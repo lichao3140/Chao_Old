@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/show_prompt"
+        android:layout_width="436px"
+        android:layout_height="270px"
+        android:layout_centerInParent="true">
+
+        <ImageView
+            android:layout_width="205px"
+            android:layout_height="72px"
+            android:layout_centerHorizontal="true"
+            android:src="@mipmap/icon_ts" />
+
+        <RelativeLayout
+            android:layout_width="436px"
+            android:layout_height="223px"
+            android:layout_alignParentBottom="true"
+            android:background="@mipmap/bg_ts" >
+            <LinearLayout
+                android:layout_width="436px"
+                android:layout_height="223px"
+                android:layout_centerHorizontal="true"
+                android:gravity="center" >
+
+                <TextView
+                    android:id="@+id/loadprompt"
+                    android:layout_width="400px"
+                    android:layout_height="200px"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center"
+                    android:singleLine="false"
+                    android:text="请刷身份证"
+                    android:textColor="#EEC900"
+                    android:textSize="50px"
+                    android:textStyle="bold"/>
+
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+</RelativeLayout>

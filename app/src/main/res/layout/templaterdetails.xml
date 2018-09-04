@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:gravity="center"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+
+    <LinearLayout
+        android:layout_width="600px"
+        android:layout_height="300px">
+
+        <LinearLayout
+            android:layout_width="200px"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="50px"
+            android:gravity="center">
+
+            <ImageView
+                android:padding="5px"
+                android:paddingTop="20px"
+                android:id="@+id/tempdetail_bitmap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="300px"
+                android:layout_height="70px"
+                android:gravity="center_vertical|left">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="姓 名:" />
+
+                <EditText
+                    android:id="@+id/tempdetail_name"
+                    android:layout_width="200px"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="300px"
+                android:layout_height="70px"
+                android:gravity="center_vertical|left">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="工号:" />
+
+                <EditText
+                    android:digits="@string/filter_vcode"
+                    android:id="@+id/tempdetail_worknumber"
+                    android:layout_width="200px"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="300px"
+                android:layout_height="70px"
+                android:gravity="center_vertical|left">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="类型:" />
+
+
+                <Spinner
+                    android:id="@+id/tempdetail_type"
+                    android:layout_width="200px"
+                    android:layout_height="wrap_content"
+                    android:entries="@array/user_type"
+                    android:gravity="center">
+
+                </Spinner>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/tempdetail_close"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@null"
+            android:text="取消"
+            android:textColor="#AAAAAA"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/tempdetail_updateFace"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@null"
+            android:text="修改"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <!--<LinearLayout-->
+        <!--android:layout_width="427px"-->
+        <!--android:layout_height="70px"-->
+        <!--android:gravity="center">-->
+
+        <!--<Button-->
+            <!--android:id="@+id/tempdetail_updateFace"-->
+            <!--android:layout_width="150px"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_weight="1"-->
+            <!--android:text="修改" />-->
+
+        <!--<Button-->
+            <!--android:id="@+id/tempdetail_close"-->
+            <!--android:layout_width="150px"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_weight="1"-->
+            <!--android:text="取消" />-->
+    <!--</LinearLayout>-->
+
+
+</LinearLayout>

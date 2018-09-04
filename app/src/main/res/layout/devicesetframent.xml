@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="#ffff"
+              android:gravity="center_horizontal"
+              android:orientation="vertical">
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:text="基本信息配置"
+        android:textSize="25sp"/>
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:layout_marginTop="20dp">
+        <!-- 1:1阀值   -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1:1核验 阀值："
+                android:textSize="20sp"/>
+
+            <EditText
+                android:id="@+id/threshold_1"
+                android:layout_width="200px"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+
+        <!-- 1:N阀值   -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1:N核验 阀值："
+                android:textSize="20sp"/>
+
+            <EditText
+                android:id="@+id/threshold_n"
+                android:layout_width="200px"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- 返回待机等待时间   -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="等待待机时间："
+                android:textSize="20sp"/>
+
+            <EditText
+                android:id="@+id/wait_for_time"
+                android:layout_width="200px"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- 开门延迟时间   -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="开门延迟时间："
+                android:textSize="20sp"/>
+
+            <EditText
+                android:id="@+id/open_time"
+                android:layout_width="200px"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+
+        <!-- 本机静态IP   -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="本机 静态IP："
+                android:textSize="20sp"/>
+
+            <EditText
+                android:id="@+id/device_ip"
+                android:layout_width="200px"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="保存数据："
+                android:textColor="#747272"
+                android:textSize="20sp"/>
+
+
+            <Spinner
+                android:id="@+id/Preservation_time"
+                android:layout_width="200px"
+                android:layout_height="wrap_content"
+                android:entries="@array/user_time"
+                android:gravity="center"
+                android:theme="@style/MyEditText"
+                android:textSize="20sp"/>
+
+        </LinearLayout>
+
+        <!-- 开启语音播报 -->
+
+        <!--LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <CheckBox
+                android:id="@+id/cb_choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="开启语音播报"
+                android:textSize="20sp"/>
+
+
+        </LinearLayout-->
+
+
+    </LinearLayout>
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:text="FaceVMS设置"
+        android:textSize="25sp"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="20dp">
+
+        <!-- vmsIP地址 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="IP地址："
+                android:textSize="20sp"/>
+
+            <EditText
+                android:id="@+id/vms_ip"
+                android:layout_width="200px"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+        <!-- vms端口号： -->
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="端口号："
+                android:textSize="20sp"/>
+
+            <EditText
+                android:id="@+id/vms_port"
+                android:layout_width="200px"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+        <!-- vms用户名 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="用户名："
+                android:textSize="20sp"/>
+
+            <EditText
+                android:id="@+id/vms_uername"
+                android:layout_width="200px"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+
+        <!-- vms密 码 -->
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="密 码："
+                android:textSize="20sp"/>
+
+            <EditText
+                android:id="@+id/vms_password"
+                android:layout_width="200px"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+
+    <Button
+        android:id="@+id/btn_Refresh"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:text="重置"
+        android:textSize="25sp"/>
+    <Button
+        android:id="@+id/btn_Sure"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="确定"
+        android:textSize="25sp"/>
+
+
+</LinearLayout>

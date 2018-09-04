@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">G69A_SN</string>
+
+    <string-array name="user_type">
+        <item>未知</item>
+        <item>黑名单</item>
+        <item>白名单</item>
+        <item>顾客</item>
+        <item>业主</item>
+        <item>访客</item>
+    </string-array>
+
+    <string-array name="user_sex">
+        <item>未知</item>
+        <item>男</item>
+        <item>女</item>
+    </string-array>
+
+    <string-array name="user_time">
+        <item>90天</item>
+        <item>60天</item>
+        <item>30天</item>
+    </string-array>
+
+    <string name="filter_vcode">0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
+</resources>

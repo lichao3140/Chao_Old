@@ -1,0 +1,826 @@
+﻿<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>核验记录</title>
+    <meta name="description" content="这是一个 index 页面">
+    <meta name="keywords" content="index">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="renderer" content="webkit">
+    <meta name="apple-mobile-web-app-title" content="Amaze UI"/>
+    <link rel="stylesheet" href="../css/amazeui.min.css"/>
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="../css/app.css">
+    <script src="../js/jquery-2.1.1.min.js"></script>
+    <link rel="stylesheet" href="../css/amazeui.datetimepicker.css" type="text/css"></link>
+    <script type="text/javascript" src="../js/amazeui.datetimepicker.min.js"></script>
+    <script type="text/javascript" src="../js/locales/amazeui.datetimepicker.zh-CN.js"
+            charset="UTF-8"></script>
+    <link rel="stylesheet" href="../css/sweet-alert.css">
+    <script src="../js/sweet-alert.min.js"></script>
+
+</head>
+
+<style>
+        .tab_btn{
+            height:38px;
+            font-size:14px;
+            border-radius: 5px;
+            outline: none;
+            cursor: hand;
+            background-color:#4aaa4a;
+            color:white;
+        }
+        table tr td{
+	    	overflow: hidden;
+	    }
+        body{
+            -moz-user-select: none; /*火狐*/
+            -webkit-user-select: none; /*webkit浏览器*/
+            -ms-user-select: none; /*IE10*/
+            -khtml-user-select: none; /*早期浏览器*/
+            user-select: none;
+        }
+        html{
+            background-color: #ffffffab;
+        }
+        body::-webkit-scrollbar {/*滚动条整体样式*/
+            width: 10px;     /*高宽分别对应横竖滚动条的尺寸*/
+            height: 1px;
+        }
+        body::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
+            border-radius: 10px;
+            -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+            background: #FFFFFF;
+        }
+        body::-webkit-scrollbar-track {/*滚动条里面轨道*/
+            -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+            border-radius: 10px;
+            /* background: #EDEDED; */
+        }
+        #contab{
+            height:100%;
+            width:100%;
+            margin:0px;
+            padding:0px;
+            border-bottom:1px solid #bfbdbd;
+        }
+        #contab tbody {
+               display: block;
+               width: 100%;
+               height: 370px;
+               max-height: 410px;
+               overflow-y: scroll;
+               margin: 0px;
+               padding: 0px;
+        }
+         #contab tbody tr td{
+        	text-align:center;
+        }
+         #contab thead th{
+        	text-align:center;
+        }
+        #contab thead{
+        	display:block;
+            width:99.3%;
+        }
+        #contab thead tr {
+			display:table;
+			width:100%;
+			table-layout:fixed;
+		}
+		
+		#contab tbody tr {
+			display:table;
+			width:100%;
+			table-layout:fixed;
+		}
+        
+        #contab tbody::-webkit-scrollbar {
+            width: 10px;     
+            height: 1px;
+        }
+        #contab tbody::-webkit-scrollbar-thumb {
+            border-radius: 10px;
+            -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+            background: #FFFFFF;
+        }
+        #contab tbody::-webkit-scrollbar-track {
+            -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+        .imgborder
+        {
+            border:1px solid red;
+        }
+
+        .hovertd{
+			background-color:white!important;
+	    }
+
+
+
+
+</style>
+<script>
+    	var imgid;
+    	var page=1;
+        var upddata;
+        var addindex;
+        var trackerstop;
+        $(function(){
+            var date = new Date();
+            var seperator1 = "-";
+            var seperator2 = ":";
+            var month = date.getMonth() + 1;
+            var strDate = date.getDate();
+            if (month >= 1 && month <= 9) {
+                month = "0" + month;
+            }
+            if (strDate >= 0 && strDate <= 9) {
+                strDate = "0" + strDate;
+            }
+            var currentdate = date.getFullYear() + seperator1 + month + seperator1 + "01";
+           
+            var currentdate2 = date.getFullYear() + seperator1 + month + seperator1 + strDate;
+            
+
+
+
+            $("#starttime").val(currentdate);
+            $("#endtime").val(currentdate2);
+
+			 $('.form_datetime-5').datetimepicker({
+		        format: 'yyyy-mm-dd',
+		        autoclose: true,
+		        todayBtn: true,
+		        language:'zh-CN',
+                 minView:'month'
+		    });
+		   
+            //初始化列表
+            reloadcon(0);
+        });
+
+		//获取图片
+		function showimg(id){
+            $("#concardimg").css("display","block");
+            $("#confaceimg").css("display","block");
+			imgid=id;
+			console.info(imgid);
+            //获取图片
+            $.ajax({
+                url:'queryRecordImage',
+                type:'post',
+                dataType:'json',
+                contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+                data:{id:imgid.toString(),type:'0'},
+                success:function(data){
+                    console.info(data);
+                    if(data.code==200){
+                        //遍历核验图片
+                        var cardbaseimg = "data:image/png;base64," + data.data.libImage;
+                        var facebaseimg = "data:image/png;base64," + data.data.capImage;
+
+                        document.getElementById('concardimg').src = cardbaseimg;
+                        document.getElementById('confaceimg').src = facebaseimg;
+                    }else{
+                    	document.getElementById('concardimg').src = "";
+                        document.getElementById('confaceimg').src = "";
+                    }
+                },
+                error:function(data){
+                    console.info("456");
+                }
+            });
+
+		}
+
+        /* 添加图片模板并预览 */
+        function addimg(){
+            var file = $('#files').get(0).files[0];
+            var reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload=function(e){
+                var imgs="<img src="+e.target.result+" width='102px' id='' height='126px' style=\"cursor: pointer;margin-right:3px;box-sizing: content-box;\" onclick=\"addimgborder(this);\" />";
+                $("#imgtd").append(imgs);
+                document.getElementById("files").value="";
+            };
+        }
+
+        /* 打开添加人脸模板面板 */
+        function openaddmodel(){
+        	console.info(addindex);
+        	if(addindex!==undefined&&addindex!==""){
+        		console.info(123);
+	            //为显示框赋值
+	            $("#addff_name").val(upddata.data[addindex].fti_name);
+	            $("#addff_type").val(upddata.data[addindex].fti_type);
+	            $("#addff_sex").val(upddata.data[addindex].fti_sex);
+	            $("#addff_age").val(upddata.data[addindex].fti_age);
+	            $("#addff_card_id").val(upddata.data[addindex].fti_code);
+	
+	            //获取图片
+	            $.ajax({
+	                url:'http://'+parent.interurl+'/api/Result/getImage',
+	                type:'post',
+	                dataType:'json',
+	                contentType: "application/x-www-form-urlencoded;charset=GBK",
+	                data:JSON.stringify({"id":upddata.data[addindex].id.toString()}),
+	                success:function(data){
+	                    console.info(data);
+	                    if(data.data!=undefined) {
+	                        //遍历核验图片
+	                        var imgs="<img src='data:image/jpeg;base64,"+data.data[0].capImage+"' width='102px' id='' height='126px' class='modelimg' style='cursor: pointer;margin-right:3px;box-sizing: content-box;' onclick='addimgborder(this);' />";
+	                        $("#imgtd").append(imgs);
+	
+	                    }else{
+	                    }
+	                },
+	                error:function(data){
+	                    console.info("456");
+	                }
+	            });
+	
+	            $('#my-prompt').modal({
+	                relatedTarget: this,
+	                closeViaDimmer:false,
+	                onConfirm: function(e) {
+	                    /*alert('你输入的是：' + e.data || '')*/
+	
+	                    //处理多张图片
+		                var imglistlen=$("#imgtd").children().length;
+		                var imglist=[];
+		                var imglistmap=$("#imgtd").children();
+		                console.info(imglistlen);
+		                for(var i=0;i<imglistlen;i++){
+		                    var base=imglistmap[i].src;
+		                    var imgbase=base.substr(23);
+		                    console.info(imgbase);
+		                    var baselist={ff_image:imgbase,};
+		                    imglist.push(baselist);
+		                }
+	                    $.ajax({
+	                        url:'http://'+parent.interurl+'/api/Flib/add',
+	                        type:'post',
+	                        dataType:'json',
+	                        contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+	                        data:JSON.stringify({"ff_name":$("#addff_name").val(), "ff_type":$("#addff_type").val(),
+	                            "ff_sex":$("#addff_sex").val(), "ff_age":$("#addff_age").val(),
+	                            "ff_remarks":$("#addff_remarks").val(), "ff_addr":$("#addff_addr").val(),
+	                            "ff_phone":$("#addff_phone").val(), "ff_job_number":$("#addff_job_number").val(),
+	                            "ff_card_id":$("#addff_card_id").val(), "ff_list":imglist,
+	                            "ff_cal_id":$("#addcal_id").val()
+	                        }),
+	                        success:function(data){
+	                            console.info(data);
+	                            if(data.message=="添加模板成功"){
+	                                swal("成功",data.message,"success");
+	                            }else{
+	                            	swal("错误",data.message,"error");
+	                            }
+	                            clear();
+	                        },
+	                        error:function(data){
+	                            console.info(data);
+	                        }
+	                    });
+	
+	                },
+	                onCancel: function(e) {
+	                }
+	            });
+        	}
+        };
+        //清除显示框数据
+        function clear(){
+            $("#addff_name").val("");
+            $("#addff_type").val("0");
+            $("#addff_sex").val("0");
+            $("#addff_age").val("");
+            $("#addff_remarks").val("");
+            $("#addff_phone").val("");
+            $("#addff_job_number").val("");
+            $("#addff_card_id").val("");
+            $("#imgtd").empty();
+            imgid="";
+            addindex="";
+        }
+        
+		var checkdellist=[];    
+        /* 打开删除提示面板 */
+        function opendelmodel(){
+	        var obj=document.getElementsByName('concheck'); //选择所有name="'concheck'"的对象，返回数组 
+			//取到对象数组后，我们来循环检测它是不是被选中 
+			for(var i=0; i<obj.length; i++){ 
+				if(obj[i].checked) checkdellist.push(obj[i].value); //如果选中，将value添加到变量s中
+			}
+			
+			if(checkdellist.length>0){
+				$('#my-prompt2').modal({
+	                relatedTarget: this,
+	                onConfirm: function(e) {
+						var delnum=0;
+	                    for(var i=0;i<checkdellist.length;i++){
+	                        $.ajax({
+	                            url:'deleteRecord',
+	                            type:'post',
+	                            dataType:'json',
+	                            contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+	                            data:{id:checkdellist[i]},
+	                            success:function(data){
+	                                console.info(data);
+	                            },
+	                            error:function(data){
+	                                console.info("456");
+	                            },
+	                            complete:function(data){
+		                        	delnum++;
+		                            if(delnum==checkdellist.length){
+		                            	swal("成功","删除核验记录成功","success");
+		                            	reloadcon(0);
+		                            	checkdellist=[];
+		                            }
+		                        }
+	                        });
+	                    }
+		            },
+		            onCancel: function(e) {
+			            /*alert('不想说!');*/
+			        }
+	            });
+			}
+        }
+
+        //载入人证比对记录
+        function reloadcon(clearpage){
+        	if(clearpage!=undefined){
+            	$("#page").val("1");
+                if($("#fcmp_cardId").val().length>0&&$("#fcmp_cardId").val().match(/[\x01-\xFF]*/)==false){
+                    swal("警告","证件号只能输入数字或字母","warning");
+                    return;
+                }
+            }
+        	clear();
+        	$("#checkall").prop("checked",false);
+            //初始化分页栏
+            $("#contab tbody").empty();
+            var starttimes=Date.parse($("#starttime").val()).toString();
+
+            var endtimes=Date.parse($("#endtime").val()+" 23:59:59").toString();
+            $.ajax({
+                url:'queryRecordCount',
+                type:'post',
+                dataType:'json',
+                data:{time_begin:starttimes.substring(0,starttimes.length-3),time_end:endtimes.substring(0,endtimes.length-3),
+                                     page_no:$("#page").val(),page_size:$("#row").val(),
+                                     fcmp_cardId:$("#fcmp_cardId").val(),
+                                     fcmp_name:$("#fcmp_name").val(),tmp_type:'-1',
+                                     fcmp_recult:$("#fcmp_recult").val(),type:'0'
+                },
+                contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+                success:function(data){
+                    console.info(data);
+                    $("#total").html(data.count.toString());
+                    //计算总页数
+                    var row=$("#row").val();
+                    if((data.count-row)>0){
+                        page= Math.ceil(data.count/row);
+                    }else{
+                    	page="1";
+                    }
+
+                    //初始化人证比对记录列表
+                    $.ajax({
+                        url:'queryRecord',
+                        type:'post',
+                        dataType:'json',
+                        contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+                        data:{time_begin:starttimes.substring(0,starttimes.length-3),time_end:endtimes.substring(0,endtimes.length-3),
+                                     page_no:$("#page").val(),page_size:$("#row").val(),
+                                     fcmp_cardId:$("#fcmp_cardId").val(),
+                                     fcmp_name:$("#fcmp_name").val(),tmp_type:'-1',
+                                     fcmp_recult:$("#fcmp_recult").val(),type:'0'
+                        },
+                        success:function(data){
+                            console.info(data);
+                            upddata=data;
+                            //初始化列表
+                            if(data.data!=null){
+                                for ( var i = 0; i < data.data.length; i++) {
+
+                                    //核验结果
+                                    if(data.data[i].record.compertResult=="成功"){
+                                    	var fontcolors="green";
+                                        var fcmprecult="验证成功";
+                                    }
+                                    //核验结果
+                                    if(data.data[i].record.compertResult=="失败"){
+                                    	var fontcolors="red";
+                                        var fcmprecult="验证失败";
+                                    }
+                                    var gender=data.data[i].sex;
+                                    //时间戳格式转换
+                                    var d = new Date(data.data[i].time* 1000);
+                                    var month=d.getMonth() +1;
+                                    var day=d.getDate();
+                                    var hours=d.getHours();
+                                    var minutes=d.getMinutes();
+                                    var seconds=d.getSeconds();
+                                    if(d.getMonth() + 1<10){
+                                        month="0"+(d.getMonth() +1).toString();
+                                    }
+                                    if(d.getDate()<10){
+                                        day="0"+d.getDate().toString();
+                                    }
+                                    if(d.getHours()<10){
+                                        hours="0"+d.getHours().toString();
+                                    }
+                                    if(d.getMinutes()<10){
+                                        minutes="0"+d.getMinutes().toString();
+                                    }
+                                    if(d.getSeconds()<10){
+                                        seconds="0"+d.getSeconds().toString();
+                                    }
+                                    var date = (d.getFullYear()) + "-" +
+                                        (month) + "-" +
+                                        (day) + " " +
+                                        (hours) + ":" +
+                                        (minutes) + ":" +
+                                        (seconds);
+
+                                    //解析其他信息
+
+                                        $("#contab tbody").append("<tr><td style='cursor:hand;width:30px;' onclick='getFrameContent(0,this,"+data.data[i].id+","+i+")'><input type='checkbox' name='concheck' value='"+data.data[i].id+"'></td>" +
+
+"<td style='cursor:hand;' onclick='getFrameContent(0,this,"+data.data[i].id+","+i+")'>" + data.data[i].id + "</td>" +
+                                            "<td style='cursor:hand;' onclick='getFrameContent(0,this,"+data.data[i].id+","+i+")'>" + data.data[i].name + "</td>" +
+                                            "<td style='cursor:hand;color:"+fontcolors+";' onclick='getFrameContent(0,this,"+data.data[i].id+","+i+")'>" + fcmprecult + "</td>" +
+                                            "<td style='cursor:hand;' onclick='getFrameContent(0,this,"+data.data[i].id+","+i+")'>" + data.data[i].record.score + "</td>" +
+                                            "<td style='cursor:hand;' onclick='getFrameContent(0,this,"+data.data[i].id+","+i+")'>" + date + "</td>" +
+
+                                            "<td style='cursor:hand;' onclick='getFrameContent(0,this,"+data.data[i].id+","+i+")'>" + data.data[i].cardNo+ "</td>" +
+
+                                            "<td style='cursor:hand;' onclick='getFrameContent(0,this,"+data.data[i].id+","+i+")'>" + gender + "</td>" +
+
+                                            "</tr>");
+
+                                }
+
+                            }
+                        },
+                        error:function(data){
+                            console.info("456");
+                        }
+                    });
+                },
+                error:function(data){
+                }
+            });
+        }
+
+        //控制checkbox选中状态及获取图片
+        //0-单次选中，1-全选
+        function getFrameContent(checktype,frameSelect,id,index){
+        if(checktype==0){
+        	addindex=index;
+            //获取点击的一行tr
+            var tr = $(frameSelect).parent();
+            //获取tr的所有td元素
+            var b = tr.children();
+            var checkstatu;
+            for(var i=0;i<tr.children("td").length;i++){
+            	if(b.eq(i).is('.hovertd')){
+                	b.eq(i).removeClass("hovertd");
+                	checkstatu=0;
+                }else{
+	                b.eq(i).addClass("hovertd");
+	                checkstatu=1;
+                }
+            }
+            if(checkstatu==0){
+            	b.eq(0).children().prop("checked",false);
+            }
+            if(checkstatu==1){
+				b.eq(0).children().prop("checked",true);
+            }
+            if($('input[name="concheck"]:checked').length==$('input[name="concheck"]').length){
+                $("#checkall").prop("checked",true);
+            }else{
+                $("#checkall").prop("checked",false);
+            }
+            //获取图片
+            showimg(id);
+        }
+        if(checktype==1){
+             //全选
+            if(id==0){
+                //全选
+                $("#contab tbody tr td").addClass("hovertd");
+                $("input[name='concheck']").prop("checked",true); 
+            }
+            if(id==1){
+                $("#contab tbody tr td").removeClass("hovertd");
+				$("input[name='concheck']").prop("checked",false); 
+            }
+        }
+    }
+
+    //选中所有复选框
+    function clickallbox(){
+        if($('input[name="concheck"]:checked').length!=$('input[name="concheck"]').length) {
+        	getFrameContent(1, "",0);
+        }else{
+        	getFrameContent(1, "",1);
+        }
+    }
+
+        //下一页
+        function nextpage(){
+            var nowpage=$("#page").val();
+            console.info(nowpage,page);
+            if(nowpage<page){
+                $("#page").val(parseInt(nowpage)+1);
+                reloadcon();
+            }
+        }
+
+        //上一页
+        function previouspage(){
+            var nowpage=$("#page").val();
+            if(nowpage>1){
+                $("#page").val(parseInt(nowpage)-1);
+                reloadcon();
+            }
+        }
+
+        //第一页
+        function headpage(){
+            var headpages=$("#page").val();
+            console.info(headpages,page);
+            if(headpages!=1){
+                $("#page").val(1);
+                reloadcon();
+            }
+        }
+
+        //最后一页
+        function footpage(){
+            var footpages=$("#page").val();
+            console.info(footpages,page);
+            if(footpages!=page){
+                $("#page").val(page);
+                reloadcon();
+            }
+        }
+
+
+
+        //Excel导出
+        var idTmr;
+        function  getExplorer() {
+            var explorer = window.navigator.userAgent ;
+            //ie
+            if (explorer.indexOf("MSIE") >= 0) {
+                return 'ie';
+            }
+            //firefox
+            else if (explorer.indexOf("Firefox") >= 0) {
+                return 'Firefox';
+            }
+            //Chrome
+            else if(explorer.indexOf("Chrome") >= 0){
+                return 'Chrome';
+            }
+            //Opera
+            else if(explorer.indexOf("Opera") >= 0){
+                return 'Opera';
+            }
+            //Safari
+            else if(explorer.indexOf("Safari") >= 0){
+                return 'Safari';
+            }
+        }
+        function method1(tableid) {//整个表格拷贝到EXCEL中
+            if(getExplorer()=='ie')
+            {
+                var curTbl = document.getElementById(tableid);
+                var oXL = new ActiveXObject("Excel.Application");
+
+                //创建AX对象excel
+                var oWB = oXL.Workbooks.Add();
+                //获取workbook对象
+                var xlsheet = oWB.Worksheets(1);
+                //激活当前sheet
+                var sel = document.body.createTextRange();
+                sel.moveToElementText(curTbl);
+                //把表格中的内容移到TextRange中
+                sel.select;
+                //全选TextRange中内容
+                sel.execCommand("Copy");
+                //复制TextRange中内容
+                xlsheet.Paste();
+                //粘贴到活动的EXCEL中
+                oXL.Visible = true;
+                //设置excel可见属性
+
+                try {
+                    var fname = oXL.Application.GetSaveAsFilename("Excel.xls", "Excel Spreadsheets (*.xls), *.xls");
+                } catch (e) {
+                    print("Nested catch caught " + e);
+                } finally {
+                    oWB.SaveAs(fname);
+
+                    oWB.Close(savechanges = false);
+                    //xls.visible = false;
+                    oXL.Quit();
+                    oXL = null;
+                    //结束excel进程，退出完成
+                    //window.setInterval("Cleanup();",1);
+                    idTmr = window.setInterval("Cleanup();", 1);
+                }
+
+            }
+            else
+            {
+                tableToExcel('contab');
+            }
+        }
+        function Cleanup() {
+            window.clearInterval(idTmr);
+            CollectGarbage();
+        }
+        var tableToExcel = (function() {
+            var uri = 'data:application/vnd.ms-excel;base64,',
+                template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><meta charset="UTF-8"><body><table>{table}</table></body></html>',
+                base64 = function(s) { return window.btoa(unescape(encodeURIComponent(s))); },
+                format = function(s, c) {
+                    return s.replace(/{(\w+)}/g,
+                        function(m, p) { return c[p]; }); };
+            return function(table, name) {
+                if (!table.nodeType) table = document.getElementById(table);
+                var ctx = {worksheet: name || 'Worksheet', table: table.innerHTML};
+                window.location.href = uri + base64(format(template, ctx));
+            };
+        })();
+
+
+
+
+</script>
+<body data-type="generalComponents" style="background-color:transparent;height:100%;">
+
+<div class="tpl-page-container tpl-page-header-fixed"
+     style="height:100%;margin-top:0px;margin-bottom: 0px;padding:0px;z-index: -999;">
+
+    <div class="tpl-content-wrapper"
+         style="padding-left: 20px;padding-top:0px;height:100%;margin-top:0px;z-index:999;">
+        <div class="tpl-portlet-components"
+             style="position:absolute;margin-top:0px;background-color:transparent;width:98.8%;height:100%;padding:0px;">
+
+            <div class="tpl-block">
+
+                <div class="am-g">
+                    <div class="tpl-content-page-title" style="padding-top:10px;">
+                        >> 1:1比对结果
+                    </div>
+                    <div class="am-g">
+                        <div class="am-u-sm-12 am-u-md-6" style="width:240px;">
+                            <div class="am-btn-toolbar"  >
+                                <!-- 时间组件 -->
+                                <div class="am-input-group date form_datetime-5" id="datetimepicker1" style="width:198px;">
+                                    <input size="16" type="text" id="starttime" class="am-form-field" style="width:150px;border-top:1px solid #c2cad8;border-left:1px solid #c2cad8;border-right:1px solid #c2cad8;text-align:center;" readonly>
+                                    <span class="am-input-group-label add-on"><i class="icon-th am-icon-calendar"></i></span>
+                                </div>
+                                <div class="am-input-group date form_datetime-5" id="datetimepicker2" style="width:198px;">
+                                    <input size="16" type="text" id="endtime" class="am-form-field" style="width:150px;border-top:1px solid #c2cad8;border-left:1px solid #c2cad8;border-right:1px solid #c2cad8;text-align:center;" readonly>
+                                    <span class="am-input-group-label add-on"><i class="icon-th am-icon-calendar"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="am-u-sm-12 am-u-md-3" style="width:950px;float:left;">
+                            <div class="am-form-group">
+                                <span style="font-size:16px;line-height:26px;">&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;姓名：</span><input type="text" id="fcmp_name" style="border:1px solid #bfbdbd;outline: none;background-color: transparent;" />
+
+                                <span style="font-size:16px;line-height:26px;">身份证号码：</span><input type="text" id="fcmp_cardId" style="background-color: transparent;border:1px solid #bfbdbd;outline: none;" />
+                                <span style="font-size:16px;line-height:26px;margin-right:-4px;">&nbsp;&nbsp;&nbsp;&nbsp;结果类型：</span>
+                                <select id="fcmp_recult" data-am-selected="{btnSize: 'sm'}">
+                                    <option value="0" selected>全部</option>
+                                    <option value="1">核验成功</option>
+                                    <option value="2">核验失败</option>
+                                </select>
+                            </div>
+
+                        </div>
+                        <div>
+                            <button style="float: left;margin-top:12px;border-radius:4px;outline: none;cursor: hand;display: block;" class="am-btn  am-btn-default am-btn-success tpl-am-btn-success am-icon-search" type="button" onclick="reloadcon(0)"></button>
+                            <!-- 工具栏 -->
+                            <div style="float: left;margin-left:10%;margin-top:12px;">
+                                <input class="tab_btn" type="button" value="删除记录" onclick="opendelmodel()" />
+                                <input class="tab_btn" type="button" value="刷新列表" onclick="reloadcon(0)" />
+                                <input class="tab_btn" type="button" value="数据导出" onclick="method1('contab')" />
+                            </div>
+                        </div>
+                </div>
+                <div class="am-g" >
+                    <div class="am-u-sm-12">
+                        <form class="am-form">
+                            <table class="am-table am-table-striped am-table-hover table-main"
+                                   id="contab">
+                                <thead>
+                                <tr>
+                                    <th style="width:30px;"><input id="checkall" type="checkbox"
+                                                                   onchange="clickallbox()"></th>
+                                    <th>ID</th>
+                                    <th>姓名</th>
+                                    <th>核验结果</th>
+                                    <th>分值</th>
+                                    <th>比对时间</th>
+                                    <th>身份证号码</th>
+
+                                    <th>性别</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                            <!-- 图片栏 -->
+                            <div id="imgview"
+                                 style="text-align:center;border:1px solid #bfbdbd;margin-top:6px;height:130px;width:100%;padding:0px;">
+                                <img id="concardimg" width="102px" height="126px"
+                                     style="display:none;float:left;"><img id="confaceimg"
+                                                                           width="102px"
+                                                                           height="126px"
+                                                                           style="display:none;">
+                            </div>
+                            <!-- 分页栏 -->
+                            <div style="width:100%;height:25px;">
+                                <!-- 每页显示数据数量 -->
+                                <select id="row"
+                                        style="text-align:center;padding-top:0px;padding-bottom:0px;height:25px;font-size:16px;float:left;width:50px;border:1px solid black;background-color:transparent;border:none;color:black;line-height:25px;outline:none;"
+                                        onchange="reloadcon()">
+                                    <option value="50" style="line-height:25px;color:black;"
+                                            selected>50
+                                    </option>
+                                    <option value="100" style="line-height:25px;color:black;">100
+                                    </option>
+                                    <option value="200" style="line-height:25px;color:black;">200
+                                    </option>
+                                    <option value="500" style="line-height:25px;color:black;">500
+                                    </option>
+                                </select>
+                                <!-- 页码选择 -->
+                                <div style="">
+                                    <span style="float:left;height:25px;text-align:center;line-height:25px;cursor: hand;margin-right:5px;font-size:14px;"
+                                          class="page_span"><a href="javascript:headpage();"
+                                                               style="color:black;">首页</a></span>
+                                    <span style="float:left;height:25px;line-height:25px;cursor: hand;margin-right:2px;font-size:14px;"
+                                          class="page_span"><a href="javascript:previouspage();"
+                                                               style="color:black;">上一页</a></span>
+                                    <span style="float:left;height:25px;"><input id="page"
+                                                                                 type="text"
+                                                                                 value="1"
+                                                                                 style="height:25px;width:30px;text-align:center;border:none;outline: none;color:black"
+                                                                                 onchange="reloadcon()"/></span>
+                                    <span style="float:left;height:25px;line-height:25px;font-size:14px;cursor: hand;margin-right:5px;margin-left:2px;"
+                                          class="page_span"><a href="javascript:nextpage();"
+                                                               style="color:black;">下一页</a></span>
+                                    <span style="float:left;height:25px;line-height:25px;font-size:14px;cursor: hand;"
+                                          class="page_span"><a href="javascript:footpage();"
+                                                               style="color:black;">末页</a></span>
+                                    <!-- 数据总数 -->
+                                    <span style="display:block;float:right;height:25px;color:black;line-height:25px;font-size:16px;margin-right:10px;">共&nbsp;<span
+                                            id="total">0</span>&nbsp;条数据</span>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 删除提示面板 -->
+<div class="am-modal am-modal-prompt" tabindex="-4" id="my-prompt2">
+    <div class="am-modal-dialog">
+        <div class="am-modal-hd" style="border-bottom:1px solid gray;">删除确认</div>
+        <div class="am-modal-bd">
+            <div style="text-align: left;">
+                <p>是否删除该条记录？</p>
+            </div>
+        </div>
+        <div class="am-modal-footer">
+            <span class="am-modal-btn" data-am-modal-cancel>取消</span>
+            <span class="am-modal-btn" data-am-modal-confirm>确定</span>
+        </div>
+    </div>
+</div>
+
+<script src="../js/amazeui.min.js"></script>
+<script src="../js/app.js"></script>
+</body>
+
+</html>

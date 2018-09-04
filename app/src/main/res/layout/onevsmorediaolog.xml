@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/onevsmore_alert"
+        android:layout_width="436px"
+        android:layout_height="314px"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:background="@mipmap/bg_alert"
+        >
+
+        <LinearLayout
+            android:id="@+id/onevsmore_imageLayout"
+            android:layout_width="match_parent"
+            android:layout_height="150px"
+            android:layout_marginLeft="50px"
+            android:layout_marginRight="30px"
+            android:layout_marginTop="40px"
+            android:paddingBottom="10px"
+            android:paddingTop="10px">
+
+            <ImageView
+                android:id="@+id/onevsmore_face"
+                android:layout_width="105px"
+                android:layout_height="match_parent"
+                android:background="@drawable/boder"
+                android:padding="5px" />
+
+            <TextView
+                android:layout_width="130px"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="VS"
+                android:textColor="#00dbfe"
+                android:textSize="50dp" />
+
+            <ImageView
+                android:id="@+id/onevsmore_temper"
+                android:layout_width="105px"
+                android:layout_height="match_parent"
+                android:background="@drawable/boder"
+                android:padding="5px" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="90px"
+            android:layout_below="@id/onevsmore_imageLayout"
+            android:layout_marginLeft="30px"
+            android:layout_marginRight="30px"
+            android:layout_marginTop="10px">
+
+
+            <LinearLayout
+                android:layout_width="250px"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@mipmap/icon_xm" />
+
+                    <TextView
+                        android:id="@+id/onevsmore_userID"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="20px"
+                        android:gravity="center_vertical"
+                        android:text=""
+                        android:textColor="#fff"
+                        android:textSize="20dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@mipmap/icon_xm" />
+
+                    <TextView
+                        android:id="@+id/onevsmore_userName"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="20px"
+                        android:gravity="center_vertical"
+                        android:text=""
+                        android:textColor="#fff"
+                        android:textSize="20dp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@mipmap/rylx"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="40px"
+                    android:gravity="center"
+                    android:text="人员类型"
+                    android:textColor="#fff" />
+
+                <TextView
+                    android:id="@+id/onevsmore_userType"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="未定义"
+                    android:textColor="#fff" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/onevsmore_txicon"
+        android:layout_marginBottom="-15px"
+        android:layout_centerHorizontal="true"
+        android:layout_width="240px"
+        android:layout_height="98px"
+        android:layout_above="@id/onevsmore_alert"
+        android:src="@mipmap/icon_tg" />
+</RelativeLayout>

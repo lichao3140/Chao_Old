@@ -1,0 +1,1289 @@
+﻿<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>人脸库管理</title>
+    <meta name="description" content="这是一个 index 页面">
+    <meta name="keywords" content="index">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="renderer" content="webkit">
+    <meta name="apple-mobile-web-app-title" content="Amaze UI"/>
+    <link rel="stylesheet" href="../css/amazeui.min.css"/>
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="../css/app.css">
+    <script src="../js/jquery-2.1.1.min.js"></script>
+    <link rel="stylesheet" href="../css/amazeui.datetimepicker.css" type="text/css"></link>
+    <script type="text/javascript" src="../js/amazeui.datetimepicker.min.js"></script>
+    <script type="text/javascript" src="../js/locales/amazeui.datetimepicker.zh-CN.js"
+            charset="UTF-8"></script>
+    <link rel="stylesheet" href="../css/sweet-alert.css">
+    <script src="../js/sweet-alert.min.js"></script>
+
+</head>
+
+<style>
+    .tab_btn{
+        height:38px;
+        font-size:14px;
+        border-radius: 5px;
+        outline: none;
+        cursor: hand;
+        background-color:#4aaa4a;
+        color:white;
+    }
+    table tr td{
+    	overflow: hidden;
+    }
+
+    .delbox{
+
+    }
+
+    body{
+        -moz-user-select: none; /*火狐*/
+        -webkit-user-select: none; /*webkit浏览器*/
+        -ms-user-select: none; /*IE10*/
+        -khtml-user-select: none; /*早期浏览器*/
+        user-select: none;
+    }
+    html{
+        background-color: #ffffffab;
+    }
+    body::-webkit-scrollbar {/*滚动条整体样式*/
+        width: 10px;     /*高宽分别对应横竖滚动条的尺寸*/
+        height: 1px;
+    }
+    body::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
+        border-radius: 10px;
+        -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        background: #FFFFFF;
+    }
+    body::-webkit-scrollbar-track {/*滚动条里面轨道*/
+        -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        border-radius: 10px;
+        /* background: #EDEDED; */
+    }
+
+    #faclibtab{
+        height:100%;
+        width:100%;
+        margin:0px;
+        padding:0px;
+        border-bottom:1px solid #bfbdbd;
+    }
+        #faclibtab tbody {
+            display: block;
+            width: 100%;
+            height: 360px;
+            max-height: 410px;
+            overflow-y: scroll;
+            margin: 0px;
+            padding: 0px;
+            text-align: center;
+        }
+
+    #faclibtab thead{
+        display:block;
+		width:99.4%;
+    }
+
+    #faclibtab thead th{
+        text-align:center;
+    }
+
+    #faclibtab thead tr {
+        display:table;
+        width:100%;
+        table-layout:fixed;
+    }
+
+    #faclibtab tbody tr {
+        display:table;
+        width:100%;
+        table-layout:fixed;
+    }
+
+    #faclibtab tbody::-webkit-scrollbar {
+        width: 10px;
+        height: 1px;
+    }
+    #faclibtab tbody::-webkit-scrollbar-thumb {
+        border-radius: 10px;
+        -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        background: #FFFFFF;
+    }
+    #faclibtab tbody::-webkit-scrollbar-track {
+        -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        border-radius: 10px;
+    }
+    .imgborder
+    {
+        border:1px solid red;
+    }
+
+    .hovertd{
+		background-color:white!important;
+    }
+
+    .rect {
+        border: 2px solid lawngreen;
+        left: -1000px;
+        position: absolute;
+        top: -1000px;
+    }
+
+    progress
+    {
+        width: 268px;
+        height: 27px;
+        border:1px solid black;
+        border-radius: 8px;
+    }
+    progress::-webkit-progress-bar
+    {
+        background-color:transparent;
+        border-radius: 8px;
+    }
+    progress::-webkit-progress-value
+    {
+        background-color:#0f9ae0;
+        border-radius: 8px;
+        color:#4aaa4a;
+    }
+
+
+</style>
+<script>
+    var delid;
+    var page=1;
+    var imgbool=0;
+    var upddata;
+    $(function(){
+        reloadfaclib(1);
+    });
+    //文件域
+    function filechange(){
+    	var filevalue=$("#imgfiles").val();
+    	if(filevalue!=""){
+    		$('#menubtn').css('background-color','#4aaa4a');
+    		$('#menubtn').val('已选择');
+    	}
+    }
+
+    //获取图片
+    function showimg(id){
+        delid=id;
+        $("#imgview").empty();
+        //获取图片
+        $.ajax({
+            url:'queryTemplateImage',
+            type:'post',
+            dataType:'json',
+            contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+            data:{id:delid.toString()},
+            success:function(data){
+                console.info(data);
+                upddata=data;
+                //遍历核验图片
+                if(data.code==200){
+                        var cardbaseimg="<img src='data:image/jpeg;base64,"+data.data.templateImageID+"' width='102px' height='126px' />";
+                        $("#imgview").append(cardbaseimg);
+                }else{
+                    document.getElementById('concardimg').src = "";
+                }
+            },
+            error:function(data){
+            }
+        });
+    }
+
+
+
+    /* 添加图片模板并预览 */
+    function addimg(type){
+    	if(type==1){
+    		var file = $('#files').get(0).files[0];
+	        var reader = new FileReader();
+	        reader.readAsDataURL(file);
+	        reader.onload=function(e){
+	            $("#topmodel").attr("src",e.target.result);
+	            document.getElementById("files").value="";
+	        };
+    	}
+    	else if(type==2){
+    		var file = $('#updfiles').get(0).files[0];
+	        var reader = new FileReader();
+	        reader.readAsDataURL(file);
+	        reader.onload=function(e){
+	            $("#updtopmodel").attr("src",e.target.result);
+	            document.getElementById("updfiles").value="";
+	        };
+    	}
+
+    }
+     /* 打开添加人脸模板面板 */
+    function openaddmodel(){
+        /*$("#my-prompt1").load();*/
+        $('#my-prompt').modal({
+            relatedTarget: this,
+            closeViaDimmer:false,
+            onConfirm: function(e) {
+                var addff_name=$("#addff_name").val();
+                var addff_age=$("#addff_age").val();
+                var addff_job_number=$("#addff_job_number").val();
+                var addff_card_id=$("#addff_card_id").val();
+                var imgstr=$("#topmodel").attr("src");
+                //非空
+                if(addff_name==""){
+                	swal("警告","请输入名称！","warning");
+					return;
+                }
+                if(addff_age==""){
+                	swal("警告","请输入年龄！","warning");
+                	return;
+                }
+                if(addff_job_number==""){
+                	swal("警告","请输入工号！","warning");
+					return;
+                }
+               if(addff_card_id==""){
+                	swal("警告","请输入证件号！","warning");
+					return;
+                }
+                if(imgstr=="img/addimg.png" || imgstr=="" || imgstr==undefined){
+                	swal("警告","请选择人脸图片！","warning");
+					return;
+                }
+
+                /*格式判断*/
+                if($("#addff_card_id").val().length>0&&$("#addff_card_id").val().match(/[\x01-\xFF]*/)==false){
+                    swal("警告","证件号只能输入数字或字母","warning");
+                    return;
+                }
+                if($("#addff_job_number").val().length>0&&$("#addff_job_number").val().match(/[\x01-\xFF]*/)==false){
+                    swal("警告","工号只能输入数字或字母","warning");
+                    return;
+                }
+                if("0"!=$("#addff_age").val() && /^\+?[1-9][0-9]*$/.test($("#addff_age").val())==false ){
+                    console.info("0"!=$("#addff_age").val());
+                    swal("警告","年龄只能输入正整数或0","warning");
+                    return;
+                }
+
+	            $.ajax({
+	                url:'InsertTemplate',
+	                type:'post',
+	                dataType:'json',
+	                contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+	                data:{  name:addff_name, type:$("#addff_type").val(),
+	                        sex:$("#addff_sex").val(), age:addff_age,
+	                       	workNo:addff_job_number,
+	                        cardNo:addff_card_id, img:imgstr.substr(23),
+	                        currentIndex:1,numSize:1
+	                    },
+	                    success:function(data){
+	                        console.info(data);
+	                        if(data.code==200){
+	                        	swal("成功","添加模板成功","success");
+	                            reloadfaclib(1);
+	                        }else{
+	                        	swal("错误",data.msg,"error");
+	                        }
+	                        clear();
+	                    },
+	                    error:function(data){
+	                        console.info(data);
+	                        clear();
+	                    }
+	            });
+
+            },
+            onCancel: function(e) {
+                /*alert('不想说!');*/
+            }
+        });
+    };
+
+   /* 打开修改人脸模板面板 */
+    function openupdconfig(){
+        if(upddata!=undefined){
+            clear();
+            //为显示框赋值
+            $("#updff_id").attr("disabled",false);
+            $("#updff_id").val(upddata.data.id);
+            $("#updff_id").attr("disabled",true);
+            $("#updff_name").val(upddata.data.name);
+               var type;
+               if(upddata.data.type=="未知"){
+                    type=0;
+               }
+               if(upddata.data.type=="黑名单"){
+                    type=1;
+               }
+               if(upddata.data.type=="白名单"){
+                    type=56;
+               }
+               if(upddata.data.type=="顾客"){
+                    type=156;
+               }
+               if(upddata.data.type=="业主"){
+                    type=113;
+               }
+                if(upddata.data.type=="访客"){
+                    type=114;
+               }
+
+            $("#updff_type").val(type);
+            var sex;
+            if(upddata.data.sex=="未知"){
+                sex=0;
+            }
+            if(upddata.data.sex=="男"){
+                sex=1;
+            }if(upddata.data.sex=="女"){
+                sex=2;
+            }
+
+
+            $("#updff_sex").val(sex);
+            $("#updff_age").val(upddata.data.age);
+            $("#updff_job_number").val(upddata.data.wordNo);
+            $("#updff_card_id").val(upddata.data.cardNo);
+            $("#updtopmodel").attr("src","data:image/jpeg;base64,"+upddata.data.templateImageID);
+            $('#my-prompt4').modal({
+                relatedTarget: this,
+                closeViaDimmer:false,
+                onConfirm: function(e) {
+                     var addff_name=$("#updff_name").val();
+	                var addff_age=$("#updff_age").val();
+	                var addff_job_number=$("#updff_job_number").val();
+	                var addff_card_id=$("#updff_card_id").val();
+	                var imgstr=$("#updtopmodel").attr("src");
+	                //非空
+	                if(addff_name==""){
+	                	swal("警告","请输入名称！","warning");
+	                	return;
+	                }
+	               if(addff_age==""){
+	                	swal("警告","请输入年龄！","warning");
+                        return;
+	                }
+	               if(addff_job_number==""){
+	                	swal("警告","请输入工号！","warning");
+	                	return;
+	                }
+	                if(addff_card_id==""){
+	                	swal("警告","请输入证件号！","warning");
+	                	return;
+	                }
+	                if(imgstr=="img/addimg.png" || imgstr=="" || imgstr==undefined){
+	                	swal("警告","请选择人脸图片！","warning");
+	                	return;
+	                }
+
+                    /*格式判断*/
+                    if($("#addff_card_id").val().length>0&&$("#addff_card_id").val().match(/[\x01-\xFF]*/)==false){
+                        swal("警告","证件号只能输入数字或字母","warning");
+                        return;
+                    }
+                    if($("#addff_job_number").val().length>0&&$("#addff_job_number").val().match(/[\x01-\xFF]*/)==false){
+                        swal("警告","工号只能输入数字或字母","warning");
+                        return;
+                    }
+                    if("0"!=$("#addff_age").val() && /^\+?[1-9][0-9]*$/.test($("#addff_age").val())==false ){
+                        console.info("0"!=$("#addff_age").val());
+                        swal("警告","年龄只能输入正整数或0","warning");
+                        return;
+                    }
+	                    $.ajax({
+	                        url:'updateTemplate',
+	                        type:'post',
+	                        dataType:'json',
+	                        contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+	                        data:{name:$("#updff_name").val(), "type":$("#updff_type").val(),
+	                            sex:$("#updff_sex").val(), age:$("#updff_age").val(),
+	                            workNo:$("#updff_job_number").val(),
+	                            cardNo:$("#updff_card_id").val(),
+	                            id:$("#updff_id").val(),
+	                            img:imgstr.substr(23)
+	                        },
+	                        success:function(data){
+	                            console.info(data);
+	                            upddata="";
+	                            if(data.code==200){
+	                            	swal("成功","修改模板成功","success");
+	                                console.info("修改成功");
+	                                reloadfaclib(1);
+	                            }else{
+	                            	swal("错误",data.msg,"error");
+	                            }
+	                        },
+	                        error:function(data){
+	                            console.info(data);
+	                            upddata="";
+	                        }
+	                    });
+
+                },
+                onCancel: function(e) {
+                    /*alert('不想说!');*/
+                }
+            });
+        }
+    };
+     //清除显示框数据
+    function clear(){
+        $("#addff_name").val("");
+        $("#addff_type").val("0");
+        $("#addff_sex").val("0");
+        $("#addff_age").val("0");
+        $("#addff_job_number").val("");
+        $("#addff_card_id").val("");
+        $("#topmodel").prop("src","img/addimg.png");
+
+        $("#updff_name").val("");
+        $("#updff_type").val("0");
+        $("#updff_sex").val("0");
+        $("#updff_age").val("");
+        $("#updff_job_number").val("");
+        $("#updff_card_id").val("");
+        $("#updtopmodel").prop("src","img/addimg.png");
+
+		var file = $("#imgfile") ;
+		file.after(file.clone().val(""));
+		file.remove();
+        $("#menubtn").css("background-color","#fd1b30");
+        $("#menubtn").attr("value","选择目录");
+
+        $("#batchtype").val("0");
+        $("#batchgender").val("0");
+
+        /* $("#pg").attr("value","0");
+        $("#pg").attr("max","0");
+        $("#now").html("");
+        $("#all").html(""); */
+    }
+
+	//删除列表
+	var checkdellist=[];
+    /* 打开删除提示面板 */
+    function opendelmodel(){
+        var obj=document.getElementsByName('concheck'); //选择所有name="'concheck'"的对象，返回数组
+		//取到对象数组后，我们来循环检测它是不是被选中
+		for(var i=0; i<obj.length; i++){
+			if(obj[i].checked) checkdellist.push(obj[i].value); //如果选中，将value添加到变量s中
+		}
+    	if(checkdellist.length>0){
+	    	$('#my-prompt2').modal({
+	            relatedTarget: this,
+	            closeViaDimmer:false,
+	            onConfirm: function(e) {
+					var delnum=0;
+					console.info(checkdellist);
+	                for(var i=0;i<checkdellist.length;i++) {
+	                    $.ajax({
+	                        url: 'deleteTemplate',
+	                        type: 'post',
+	                        dataType: 'json',
+	                        contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+	                        data: {id: checkdellist[i]},
+	                        success: function (data) {
+
+	                        },
+	                        error: function (data) {
+
+	                            console.info("456");
+	                        },
+	                        complete:function(data){
+	                        	delnum++;
+	                            if(delnum==checkdellist.length){
+	                            	swal("成功","删除模板成功","success");
+	                            	reloadfaclib(1);
+	                            	checkdellist=[];
+	                            }
+	                        }
+	                    });
+	                }
+	            },
+	            onCancel: function(e) {
+	                /*alert('不想说!');*/
+	            }
+	        });
+    	}
+    }
+
+    //载入人脸库
+    function reloadfaclib(clearpage){
+        clear();
+        if(clearpage!=undefined){
+            	$("#page").val("1");
+                if($("#ff_card_id").val().length>0&&$("#ff_card_id").val().match(/[\x01-\xFF]*/)==false){
+                    swal("警告","证件号只能输入数字或字母","warning");
+                    return;
+                }
+                if($("#ff_job_number").val().length>0&&$("#ff_job_number").val().match(/[\x01-\xFF]*/)==false){
+                    swal("警告","工号只能输入数字或字母","warning");
+                    return;
+                }
+        }
+        delid="";
+        upddata=undefined;
+        //初始化分页栏
+        $("#checkall").prop("checked",false);
+        $("#faclibtab tbody").empty();
+        $.ajax({
+            url:'queryTemplateCount',
+            type:'post',
+            dataType:'json',
+            data:{ff_name:$("#ff_name").val(),
+                ff_type:$("#ff_type").val(),ff_sex:$("#ff_sex").val(),
+                ff_age_min:$("#ff_age_min").val(),ff_age_max:$("#ff_age_max").val(),
+                ff_job_number:$("#ff_job_number").val(),
+                ff_card_id:$("#ff_card_id").val()
+            },
+            contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+            success:function(data){
+            console.info(data);
+                if(data.code==200){
+                    $("#total").html(data.count.toString());
+                    //计算总页数
+                    var row=$("#row").val();
+                    if((data.count-row)>0){
+                        page= Math.ceil(data.count/row);
+                    }else{
+                    	page="1";
+                    }
+                    //初始化人脸库列表
+                    $.ajax({
+                        url:'queryTemplate',
+                        type:'post',
+                        dataType:'json',
+                        contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+                        data:{ff_name:$("#ff_name").val(),
+                             ff_type:$("#ff_type").val(),ff_sex:$("#ff_sex").val(),
+                             ff_age_min:$("#ff_age_min").val(),ff_age_max:$("#ff_age_max").val(),
+                            ff_job_number:$("#ff_job_number").val(),
+                            ff_card_id:$("#ff_card_id").val(),ff_page_no:$("#page").val(),
+                            ff_page_size:$("#row").val()
+                        },
+                        success:function(data){
+                            console.info(data);
+
+                            var node = document.createElement( "table" );
+                            var factabtxt="";
+                            //初始化列表
+                            if(data.code==200){
+                            	var factabtext="";
+                                for ( var i =0; i<data.data.length;i++) {
+                                    $("#faclibtab tbody").append("<tr><td style='cursor:hand;width:30px;' onclick='getFrameContent(0,this,"+data.data[i].id+")'><input type='checkbox' name='concheck' value='"+data.data[i].id+"'></td>" +
+                                        "<td style='cursor:hand;' onclick='getFrameContent(0,this,"+data.data[i].id+")'>"+ data.data[i].id+ "</td>"+
+                                        "<td style='cursor:hand;width:180px;' class='faclibtd' onclick='getFrameContent(0,this,"+data.data[i].id+")'>"+ data.data[i].name+ "</td>"+
+                                        "<td style='cursor:hand;' onclick='getFrameContent(0,this,"+data.data[i].id+")'>"+ data.data[i].type+ "</td>"+
+                                        "<td style='cursor:hand;' onclick='getFrameContent(0,this,"+data.data[i].id+")'>"+ data.data[i].sex+ "</td>"+
+                                        "<td style='cursor:hand;width:180px;' onclick='getFrameContent(0,this,"+data.data[i].id+")'>"+data.data[i].cardNo+"</td>"+                                        
+                                        "<td style='cursor:hand;' onclick='getFrameContent(0,this,"+data.data[i].id+")'>"+data.data[i].wordNo+"</td>"+
+                                        "<td style='cursor:hand;' onclick='getFrameContent(0,this,"+data.data[i].id+")'>"+data.data[i].age+"</td>"+
+                                        "</tr>");
+                                }
+                            }
+                        },
+                        error:function(data){
+                            console.info("456");
+                        }
+                    });
+                }else{
+                	$("#total").html("0");
+                }
+            },
+            error:function(data){
+            }
+        });
+    }
+
+    //控制checkbox选中状态及获取图片
+    //0-单次选中，1-全选
+    function getFrameContent(checktype,frameSelect,id){
+        if(checktype==0){
+            //获取点击的一行tr
+            var tr = $(frameSelect).parent();
+            //获取tr的所有td元素
+            var b = tr.children();
+            var checkstatu;
+            for(var i=0;i<tr.children("td").length;i++){
+            	if(b.eq(i).is('.hovertd')){
+                	b.eq(i).removeClass("hovertd");
+                	checkstatu=0;
+                }else{
+	                b.eq(i).addClass("hovertd");
+	                checkstatu=1;
+                }
+            }
+            if(checkstatu==0){
+            	b.eq(0).children().prop("checked",false);
+                upddata="";
+            }
+            if(checkstatu==1){
+				b.eq(0).children().prop("checked",true);
+            }
+            if($('input[name="concheck"]:checked').length==$('input[name="concheck"]').length){
+                $("#checkall").prop("checked",true);
+            }else{
+                $("#checkall").prop("checked",false);
+            }
+            //获取图片
+            showimg(id);
+        }
+        if(checktype==1){
+             //全选
+            if(id==0){
+                //全选
+                $("#faclibtab tbody tr td").addClass("hovertd");
+                $("input[name='concheck']").prop("checked",true);
+            }
+            if(id==1){
+                $("#faclibtab tbody tr td").removeClass("hovertd");
+				$("input[name='concheck']").prop("checked",false);
+            }
+        }
+    }
+
+    //选中所有复选框
+    function clickallbox(){
+        if($('input[name="concheck"]:checked').length!=$('input[name="concheck"]').length) {
+        	getFrameContent(1, "",0);
+        }else{
+        	getFrameContent(1, "",1);
+        }
+    }
+    //下一页
+    function nextpage(){
+        var nowpage=$("#page").val();
+        console.info(nowpage,page);
+        if(nowpage<page){
+            $("#page").val(parseInt(nowpage)+1);
+            reloadfaclib();
+        }
+    }
+
+    //上一页
+    function previouspage(){
+        var nowpage=$("#page").val();
+        if(nowpage>1){
+            $("#page").val(parseInt(nowpage)-1);
+            reloadfaclib();
+        }
+    }
+
+    //第一页
+    function headpage(){
+        var headpages=$("#page").val();
+        console.info(headpages,page);
+        if(headpages!=1){
+            $("#page").val(1);
+            reloadfaclib();
+        }
+    }
+
+    //最后一页
+    function footpage(){
+        var footpages=$("#page").val();
+        console.info(footpages,page);
+        if(footpages!=page){
+            $("#page").val(page);
+            reloadfaclib();
+        }
+    }
+
+    //打开批量导入面板
+    function openbatchmodel(){
+        $('#my-prompt3').modal({
+            closeViaDimmer:false,
+            relatedTarget: this,
+            onConfirm: function(e) {
+
+            },
+            onCancel: function(e) {
+                /*alert('不想说!');*/
+            }
+        });
+    }
+
+
+	//导入模板-jpg文件总数
+    var jpgcount=0;
+
+    //已完成数
+    var completenum=0;
+
+    //成功导入数量
+    var successnum=0;
+
+    //每次重新导入清空进度条
+    function clearimport(){
+        $("#dissbody").empty();
+        $("#disstab").css("display","none");
+        jpgcount=0;
+        completenum=0;
+        successnum=0;
+        Importmodel();
+    }
+
+    //开始导入模板图片
+    function Importmodel(){
+
+
+        var pgone=document.getElementById("pg");
+
+        var filesize = $("#imgfiles")[0].files.length;
+
+        //获取jpg文件总数
+        for(var a=0;a<filesize;a++){
+            if($("#imgfiles")[0].files[a].type=="image/jpeg" || $("#imgfiles")[0].files[a].type=="image/png" || $("#imgfiles")[0].files[a].type=="image/bmp"){
+                jpgcount++;
+            }
+        }
+        pgone.max=jpgcount;
+
+        $("#all").html(jpgcount);
+        $("#now").html(completenum);
+
+
+        loadmodel();
+
+        /* for(var i=0;i<filesize;i++){ */
+
+        /* } */
+    }
+    
+    /* 关闭批量导入面板 */
+    function closemodel(){
+    	$("#my-prompt3").modal('close');
+    }
+
+    function loadmodel(){
+    		var pgone=document.getElementById("pg");
+    		//文件名
+	        var filenamemap=[];
+
+	        //从文件名中获取的身份证号码
+	        var modelcardid=[];
+            //模板类型
+            var modeltype=[];
+            //工号
+            var gonghao=[];
+    	 	//获取文件
+            var filees = $("#imgfiles")[0].files[completenum];
+            console.info(filees.type);
+            //只读取jpg文件
+            if(filees.type=="image/jpeg" || filees.type=="image/png" || filees.type=="image/bmp"){
+                if(filees.name.indexOf("_")==-1){
+                    //文件名
+                    filenamemap.push(filees.name.substr(0,filees.name.length-4));
+                    //从文件名中获取的身份证号码
+                    modelcardid.push(filees.name.substr(0,filees.name.length-4));
+                }else{
+                    var filecn = filees.name.split("_");
+                    if(filecn.length<4){
+                        swal("警告","请以正确的格式命名文件！(证件号_姓名_模板类型_工号)","warning");
+                        return;
+                    }
+                    //人脸对象名
+                    filenamemap.push(filecn[1]);
+                    //从文件名中获取的身份证号码
+                    modelcardid.push(filecn[0]);
+                    //模板类型
+                    modeltype.push(filecn[2]);
+                    //工号
+                    gonghao.push(filecn[3].substr(0,filecn[3].length-4));
+                }
+					//创建读取文件的对象
+	                var reader = new FileReader();
+	                //正式读取文件
+	                reader.readAsDataURL(filees);
+					//为文件读取成功设置事件
+	                reader.onload=function(e) {
+	                    imgFile=e.target.result;
+	                    $.ajax({
+	                        url:'InsertTemplate',
+	                         type:'post',
+	                         timeout : 50000,
+	                            dataType:'json',
+	                            contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+	                            data:{name:filenamemap[0], type:$("#addff_type").val(),
+	                                  sex:$("#addff_sex").val(), age:'0',
+	                            	  workNo:'',
+	                                 cardNo:modelcardid[0], img:imgFile.substr(23),
+	                                 currentIndex:completenum+1,numSize:jpgcount
+	                          },
+	                        success:function(data){
+	                            console.info(data);
+	                            pgone.value=++completenum;
+	                            $("#now").html(completenum);
+	                            if(data.code==200){
+	                            	successnum++;
+	                                /* $("#now").html(successnum); */
+	                            }else{
+	                            	var disstext="<tr>" +
+                                                    "<td>"+filees.name+"</td>" +
+                                                    "<td>"+data.msg+"</td>" +
+                                                "</tr>";
+	                            	$("#dissbody").append(disstext);
+	                            }
+	                            if(completenum<jpgcount){
+	                            	loadmodel();
+	                            }
+
+
+	                        },
+	                        error:function(data){
+	                            console.info(data);
+	                        },
+	                        complete:function(data){
+	                            if(pgone.value==jpgcount){
+	                                setTimeout(function(){
+	                                    sweetAlert({
+	                                        title: "批量导入完成",
+	                                        text: "共成功导入: "+successnum+" 条数据",
+	                                        type: "success",
+	                                        confirmButtonText: "确认",
+	                                        closeOnConfirm: false
+	                                    }, function(){
+	                                        reloadfaclib(1);
+	                                        /*$("#my-prompt3").modal('close');*/
+	                                    });
+	                                },200);
+	                                $("#disstab").fadeIn();
+	                            }else{
+
+	                            }
+	                        }
+	                    });
+	                };
+				}
+    }
+
+
+
+
+
+
+
+
+</script>
+<body data-type="generalComponents" style="background-color:transparent;height:100%;">
+
+<div class="tpl-page-container tpl-page-header-fixed"
+     style="height:100%;margin-top:0px;margin-bottom: 0px;padding:0px;z-index: -999;">
+
+    <div class="tpl-content-wrapper"
+         style="padding-left: 20px;padding-top:0px;height:100%;margin-top:0px;z-index:999;">
+        <div class="tpl-portlet-components"
+             style="position:absolute;margin-top:0px;background-color:transparent;width:98.8%;height:100%;padding:0px;">
+
+            <div class="tpl-block">
+
+                <div class="am-g">
+                    <div class="tpl-content-page-title" style="padding-top:10px;">
+                        >> 人脸模板管理
+                    </div>
+                    <div class="am-g">
+                        <div class="am-u-sm-12 am-u-md-3" style="width:1100px;float:left;">
+                            <div class="am-form-group">
+                                <span style="font-size:16px;line-height:26px;">模板名称：</span><input
+                                    type="text" id="ff_name"
+                                    style="background-color: transparent;border:1px solid #bfbdbd;outline: none;"/>
+                                <span style="font-size:16px;line-height:26px;margin-right:-4px;">模板类型：</span>
+                                <select id="ff_type" data-am-selected="{btnSize: 'sm'}">
+                                    <option value="-1" selected>全部</option>
+                                    <option value="0">未知</option>
+                                    <option value="1">黑名单</option>
+                                    <option value="56">白名单</option>
+                                    <option value="112">顾客</option>
+                                    <option value="113">业主</option>
+                                    <option value="114">访客</option>
+                                </select>
+                                <span style="font-size:16px;line-height:26px;margin-right:-4px;">&nbsp;&nbsp;&nbsp;性别：</span>
+                                <select id="ff_sex" data-am-selected="{btnSize: 'sm'}">
+                                    <option value="-1" selected>全部</option>
+                                    <option value="0">未知</option>
+                                    <option value="1">男</option>
+                                    <option value="2">女</option>
+                                </select><br>
+                                <span style="font-size:16px;line-height:26px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;工号：</span><input
+                                    type="text" id="ff_job_number"
+                                    style="background-color: transparent;border:1px solid #bfbdbd;outline: none;"/>
+                                <span style="font-size:16px;line-height:26px;">&nbsp;&nbsp;&nbsp;&nbsp;证件号：</span><input
+                                    type="text" id="ff_card_id"
+                                    style="background-color: transparent;border:1px solid #bfbdbd;outline: none;"/>
+                                <span style="font-size:16px;line-height:26px;">&nbsp;&nbsp;&nbsp;&nbsp;年龄：</span><input
+                                    type="text" id="ff_age_min" value="0"
+                                    style="background-color: transparent;border:1px solid #bfbdbd;outline: none;width:50px;text-align:center;font-size:16px;"/>
+                                - <input type="text" id="ff_age_max" value="150"
+                                         style="background-color: transparent;text-align:center;font-size:16px;width:50px;border:1px solid #bfbdbd;outline: none;"/>
+                            </div>
+
+                        </div>
+                        <div>
+                            <button style="margin-top:12px;float: left;border-radius:4px;outline: none;cursor: hand;display: block;"
+                                    class="am-btn  am-btn-default am-btn-success tpl-am-btn-success am-icon-search"
+                                    type="button" onclick="reloadfaclib(1)"></button>
+                            <!-- 工具栏 -->
+                            <div style="float: left;margin-top:12px;margin-left:10%;">
+                                <input class="tab_btn" id="addfacebtn" type="button" value="添加人脸模板"
+                                       onclick="openaddmodel()"/>
+                                <input class="tab_btn" id="delfacebtn" type="button" value="删除模板"
+                                       onclick="opendelmodel(delid)"/>
+                                <input class="tab_btn" type="button" value="刷新列表"
+                                       onclick="reloadfaclib(1)"/>
+                                <input class="tab_btn" id="updfacebtn" type="button" value="修改模板"
+                                       onclick="openupdconfig()"/>
+                                <input class="tab_btn" id="batchfacebtn" type="button" value="批量添加"
+                                       onclick="openbatchmodel()"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="am-g">
+                        <div class="am-u-sm-12">
+                            <form class="am-form">
+                                <table class="am-table am-table-striped am-table-hover table-main"
+                                       id="faclibtab">
+                                    <thead>
+                                    <tr>
+                                        <th style="width:30px;"><input id="checkall" type="checkbox"
+                                                                       onchange="clickallbox()">
+                                        </th>
+                                        <th>标识ID</th>
+                                        <th style="width:180px;">名称</th>
+                                        <th>类型</th>
+                                        <th>性别</th>
+										<th style="width:180px;">证件号</th>
+                                        <th>工号</th>
+                                        <th>年龄</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="factbody">
+
+                                    </tbody>
+                                </table>
+                                <!-- 图片栏 -->
+                                <div id="imgview"
+                                     style="text-align:left;border:1px solid #bfbdbd;margin-top:6px;height:130px;width:100%;padding:0px;">
+
+                                </div>
+                                <!-- 分页栏 -->
+                                <div style="width:100%;height:25px;">
+                                    <!-- 每页显示数据数量 -->
+                                    <select id="row"
+                                            style="text-align:center;padding-top:0px;padding-bottom:0px;height:25px;font-size:16px;float:left;width:50px;border:1px solid black;background-color:transparent;border:none;color:black;line-height:25px;outline:none;"
+                                            onchange="reloadfaclib()">
+                                        <option value="50" style="line-height:25px;color:black;"
+                                                selected>50
+                                        </option>
+                                        <option value="100" style="line-height:25px;color:black;">
+                                            100
+                                        </option>
+                                        <option value="200" style="line-height:25px;color:black;">
+                                            200
+                                        </option>
+                                        <option value="500" style="line-height:25px;color:black;">
+                                            500
+                                        </option>
+                                    </select>
+                                    <!-- 页码选择 -->
+                                    <div style="">
+                                    <span style="float:left;height:25px;text-align:center;font-size:14px;line-height:25px;cursor: hand;margin-right:5px;"
+                                          class="page_span"><a href="javascript:headpage();"
+                                                               style="color:black;">首页</a></span>
+                                        <span style="float:left;height:25px;line-height:25px;font-size:14px;cursor: hand;margin-right:2px;"
+                                              class="page_span"><a href="javascript:previouspage();"
+                                                                   style="color:black;">上一页</a></span>
+                                        <span style="float:left;height:25px;"><input id="page"
+                                                                                     type="text"
+                                                                                     value="1"
+                                                                                     style="height:25px;width:30px;text-align:center;border:none;outline: none;color:black"
+                                                                                     onchange="reloadfaclib()"/></span>
+                                        <span style="float:left;height:25px;line-height:25px;font-size:14px;cursor: hand;margin-right:5px;margin-left:2px;"
+                                              class="page_span"><a href="javascript:nextpage();"
+                                                                   style="color:black;">下一页</a></span>
+                                        <span style="float:left;height:25px;line-height:25px;font-size:14px;cursor: hand;"
+                                              class="page_span"><a href="javascript:footpage();"
+                                                                   style="color:black;">末页</a></span>
+                                        <!-- 数据总数 -->
+                                        <span style="display:block;float:right;height:25px;color:black;line-height:25px;font-size:16px;margin-right:10px;">共&nbsp;<span
+                                                id="total">0</span>&nbsp;条数据</span>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加人脸对象面板 -->
+    <div class="am-modal am-modal-prompt" tabindex="-1" id="my-prompt">
+        <div class="am-modal-dialog" style="width:500px;">
+            <div class="am-modal-hd" style="border-bottom:1px solid gray;">添加人脸对象</div>
+            <div class="am-modal-bd">
+                <div style="text-align: left;">
+                    <table style="width:100%;height:100%;text-align: center;">
+                        <tr>
+                            <td style="text-align: left;padding-top:10px;" colspan="4">
+                                人脸对象基本信息：(点击图片框选择图片)
+                            </td>
+                            <td rowspan="7" style="border:1px solid #bfbdbd;"><img id="topmodel"
+                                                                                   src="../img/addimg.png"
+                                                                                   width="102px"
+                                                                                   height="126px"
+                                                                                   style="cursor: pointer;"
+                                                                                   onclick="$('#files').click();"/>
+                                <input type="file" id="files" style="display: none;"
+                                       onchange="addimg(1)"/></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: right;">名称：</td>
+                            <td style="text-align: left;" colspan="3"><input type="text"
+                                                                             id="addff_name"
+                                                                             style="border:1px solid #bfbdbd;outline: none;width:100%;"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: right;">类型：</td>
+                            <td style="text-align: left;" colspan="3"><select id="addff_type"
+                                                                              style="outline: none;width:100%;">
+                                <option value="0">未知</option>
+                                <option value="1">黑名单</option>
+                                <option value="56">白名单</option>
+                                <option value="156">顾客</option>
+                                <option value="113">业主</option>
+                                <option value="114">访客</option>
+                            </select></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: right;">性别：</td>
+                            <td style="text-align: left;"><select id="addff_sex"
+                                                                  style="outline: none;">
+                                <option value="0">未知</option>
+                                <option value="1">男</option>
+                                <option value="2">女</option>
+                            </select></td>
+                            <td style="text-align: right;">年龄：</td>
+                            <td style="text-align: left;"><input type="text" id="addff_age"
+                                                                 value="0"
+                                                                 style="border:1px solid #bfbdbd;outline: none;width:100%;"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: right;">工号：</td>
+                            <td style="text-align: left;" colspan="3"><input type="text"
+                                                                             id="addff_job_number"
+                                                                             style="border:1px solid #bfbdbd;outline: none;width:100%;"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: right;">证件号：</td>
+                            <td style="text-align: left;" colspan="3"><input type="text"
+                                                                             id="addff_card_id"
+                                                                             style="border:1px solid #bfbdbd;outline: none;width:100%;"/>
+                            </td>
+                        </tr>
+                    </table>
+                    <p style="margin:0px;padding:0px;"></p>
+                    <div style="padding: 0px;margin-left:20px;text-align:center;">
+                        <span></span>
+                        <span></span>
+                    </div>
+
+                </div>
+
+
+            </div>
+            <div class="am-modal-footer">
+                <span class="am-modal-btn" data-am-modal-cancel>取消</span>
+                <span class="am-modal-btn" data-am-modal-confirm>提交</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改人脸对象面板 -->
+    <div class="am-modal am-modal-prompt" tabindex="-1" id="my-prompt4">
+        <div class="am-modal-dialog" style="width:500px;">
+            <div class="am-modal-hd" style="border-bottom:1px solid gray;">修改人脸对象</div>
+            <div class="am-modal-bd">
+                <div style="text-align: left;">
+                    <table style="width:100%;height:100%;text-align: center;">
+                        <tr>
+                            <td style="text-align: left;padding-top:10px;" colspan="4">
+                                人脸对象基本信息：(点击图片框选择图片)
+                            </td>
+                            <td rowspan="7" style="border:1px solid #bfbdbd;"><img id="updtopmodel"
+                                                                                   src="../img/addimg.png"
+                                                                                   width="102px"
+                                                                                   height="126px"
+                                                                                   style="cursor: pointer;"
+                                                                                   onclick="$('#updfiles').click();"/>
+                                <input type="file" id="updfiles" style="display: none;"
+                                       onchange="addimg(2)"/></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: right;">标识ID：</td>
+                            <td style="text-align: left;" colspan="3"><input type="text"
+                                                                             id="updff_id"
+                                                                             style="border:1px solid #bfbdbd;outline: none;width:100%;"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: right;">名称：</td>
+                            <td style="text-align: left;" colspan="3"><input type="text"
+                                                                             id="updff_name"
+                                                                             style="border:1px solid #bfbdbd;outline: none;width:100%;"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: right;">类型：</td>
+                            <td style="text-align: left;" colspan="3"><select id="updff_type"
+                                                                              style="outline: none;width:100%;">
+                                <option value="0">未知</option>
+                                <option value="1">黑名单</option>
+                                <option value="56">白名单</option>
+                                <option value="112">顾客</option>
+                                <option value="113">业主</option>
+                                <option value="114">访客</option>
+                            </select></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: right;">性别：</td>
+                            <td style="text-align: left;"><select id="updff_sex"
+                                                                  style="outline: none;">
+                                <option value="0">未知</option>
+                                <option value="1">男</option>
+                                <option value="2">女</option>
+                            </select></td>
+                            <td style="text-align: right;">年龄：</td>
+                            <td style="text-align: left;"><input type="text" id="updff_age"
+                                                                 style="border:1px solid #bfbdbd;outline: none;width:100%;"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: right;">工号：</td>
+                            <td style="text-align: left;" colspan="3"><input type="text"
+                                                                             id="updff_job_number"
+                                                                             style="border:1px solid #bfbdbd;outline: none;width:100%;"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: right;">证件号：</td>
+                            <td style="text-align: left;" colspan="3"><input type="text"
+                                                                             id="updff_card_id"
+                                                                             style="border:1px solid #bfbdbd;outline: none;width:100%;"/>
+                            </td>
+                        </tr>
+                    </table>
+                    <p style="margin:0px;padding:0px;"></p>
+                    <div style="padding: 0px;margin-left:20px;text-align:center;">
+                        <span></span>
+                        <span></span>
+                    </div>
+
+                </div>
+
+
+            </div>
+            <div class="am-modal-footer">
+                <span class="am-modal-btn" data-am-modal-cancel>取消</span>
+                <span class="am-modal-btn" data-am-modal-confirm>提交</span>
+            </div>
+        </div>
+    </div>
+    <!-- 删除提示面板 -->
+    <div class="am-modal am-modal-prompt" tabindex="-4" id="my-prompt2">
+        <div class="am-modal-dialog">
+            <div class="am-modal-hd" style="border-bottom:1px solid gray;text-align:center;">删除确认
+            </div>
+            <div class="am-modal-bd">
+                <div style="text-align: left;">
+                    <p>是否删除人脸模板?</p>
+                </div>
+            </div>
+            <div class="am-modal-footer">
+                <span class="am-modal-btn" data-am-modal-cancel>取消</span>
+                <span class="am-modal-btn" data-am-modal-confirm>确定</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 批量导入人脸模板面板 -->
+    <div class="am-modal am-modal-prompt" tabindex="-4" id="my-prompt3">
+        <div class="am-modal-dialog">
+            <div class="am-modal-hd" style="border-bottom:1px solid gray;text-align:center;">导入人脸模板
+            </div>
+            <div class="am-modal-bd">
+                <div style="text-align: left;">
+                    <form id="imgfile">
+                        <table style="width:100%;">
+                            <tr>
+                                <td style="text-align:right;">统一对象性别：</td>
+                                <td>
+                                    <select id="batchgender"
+                                            style="outline:none;border-radius:3px;width:200px;height:32px;font-family: '微软雅黑';font-size:14px;">
+                                        <option value="0">未知</option>
+                                        <option value="1">男</option>
+                                        <option value="2">女</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="text-align:center;">
+                                    <progress id="pg" style="margin-top:10px;"></progress>
+                                    <span id="pgbarcount"
+                                          style="display: block;position:absolute;width: 348px;height: 27px;top:122px;"><label
+                                            id="now"></label> / <label
+                                            id="all"></label></span><input
+                                        type="button"
+                                        style="outline: none;cursor: hand;width:80px;height:30px;background-color:#4aaa4a;color:white;border-radius: 5px;margin-top:-20px;margin-left:10px;"
+                                        value="开始导入" id="loadbtn" onclick="clearimport()"/>
+                                    <input type="button" id="menubtn"
+                                           style="outline: none;cursor: hand;width:80px;height:30px;background-color:#fd1b30;margin-top:-20px;color:white;border-radius: 5px;"
+                                           value="选择目录" onclick="$('#imgfiles').click();"/><input
+                                        type="file" style="display:none;" id="imgfiles"
+                                        accept="image/jpeg,image/jpg" onchange="filechange()"
+                                        webkitdirectory>
+                                </td>
+                            </tr>
+
+                        </table>
+                        <table id="disstab" style="width:100%;border-top:1px solid black;margin-top:10px;text-align:center;display:none;">
+                            <thead>
+                            <tr style="border-bottom: 1px solid #dddddd;padding:55px;">
+                                <td style="width:150px;height:50px;">人脸图片名称</td>
+                                <td>错误原因</td>
+                            </tr>
+                            </thead>
+                            <tbody id="dissbody">
+
+                            </tbody>
+                            <tr>
+                            	<td colspan="2"><input style="background-color:red;border-radius:5px;color:white;width:80px;cursor:hand;text-align:center;height:25px;" value="关闭面板" onclick="closemodel()"></td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 记录图片 -->
+    <div id="divimg"
+         style="display: none;width: 104px;;z-index: 9999;background-color:#ffffff;border:1px solid #cccaca;">
+        <img id="faclibcardimg" width="102px" height="126px">
+    </div>
+    <script src="../js/amazeui.min.js"></script>
+    <script src="../js/app.js"></script>
+
+</body>
+</html>

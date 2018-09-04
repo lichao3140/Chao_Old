@@ -1,0 +1,541 @@
+﻿<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equivhttp-equiv="pragma" content="no-cache">
+    <meta http-equivhttp-equiv="cache-control" content="no-cache">
+    <meta http-equivhttp-equiv="expires" content="0">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="expires" content="0">
+    <title>人脸识别综合应用管理平台</title>
+    <script src="../js/jquery-2.1.1.min.js"></script>
+    <script src="../js/echarts.min.js"></script>
+    <script src="../js/sweet-alert.min.js"></script>
+    <style>
+        html{
+            /* overflow: inherit;*/
+            height:100%;
+        }
+        /* 禁止用户复制文本 */
+        body{
+            -moz-user-select: none; /*火狐*/
+            -webkit-user-select: none; /*webkit浏览器*/
+            -ms-user-select: none; /*IE10*/
+            -khtml-user-select: none; /*早期浏览器*/
+            user-select: none;
+
+            /* overflow: inherit;*/
+        }
+
+        body::-webkit-scrollbar {/*滚动条整体样式*/
+            width: 10px;     /*高宽分别对应横竖滚动条的尺寸*/
+            height: 1px;
+        }
+        body::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
+            border-radius: 10px;
+            -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+            background: #FFFFFF;
+        }
+        body::-webkit-scrollbar-track {/*滚动条里面轨道*/
+            -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+            border-radius: 10px;
+            /* background: #EDEDED; */
+        }
+        #menu table tr td{
+            width:100px;
+            height:50px;
+            text-align: center;
+            border-bottom: 1px solid #cccaca;
+        }
+
+    </style>
+    <script>
+        var delid;
+        var updpid;
+        var updlevel;
+        var updname;
+        var interurl;
+        var typeid;
+
+        //iframe加载数据多需id
+        var ifrmethodid;
+
+        //模板库目录总集
+        var modelmap;
+        //设备目录总计
+        var equmap;
+
+        //用户权限
+        var power=[];
+
+        //用户编号
+        var userid;
+
+        $(function(){
+            document.onkeydown=function(event){
+                var e = event || window.event || arguments.callee.caller.arguments[0];
+                if(e && e.keyCode==13){ // enter 键
+                    //要做的事情
+                    $("#ipOk").click();
+                }
+            };
+
+
+            if (document.cookie.length>0)
+            {
+                var statu=document.cookie.indexOf("VMS_LoginName=");
+
+                if(statu!=-1){
+                    var strcookie = document.cookie;//获取cookie字符串
+                    var arrcookie = strcookie.split("; ");//分割
+                    var cookiesstatu=[];
+                    //遍历匹配
+                    for ( var i = 0; i < arrcookie.length; i++) {
+                        var arr = arrcookie[i].split("=");
+                    }if(arr[0]=="VMS_LoginName" && arr[1]!="-1"){
+                        $("#logintxt").html(" "+arr[1]);
+                        cookiesstatu.push("0");
+                    }else{
+                        cookiesstatu.push("1");
+                    }
+                }
+                if($.inArray("0",cookiesstatu)==-1){
+                    window.location.href = "login.html";
+                    $("#statulamp").attr("src","img/stop.png");
+                }else{
+                    $("#statulamp").attr("src","img/pass.png");
+                }
+            }else{
+                window.location.href = "login.html";
+            };
+
+            $("#updselfrad").on('click',function(){
+                $("#updselfbtn").prop("disabled",false);
+            });
+            $("#upddefaultrad").on('click',function(){
+                $("#updselfbtn").prop("disabled",true);
+            });
+        });
+
+        //提示用户权限不足
+        function powerlack(){
+            swal("警告","用户权限不足！","warning");
+        }
+
+
+        function openurlconfig(){
+            $('#my-prompts').modal({
+                relatedTarget: this,
+                onConfirm: function(e) {
+                    interurl=e.data;
+                    loadCatalog();
+                },
+                onCancel: function(e) {
+                    /*alert('不想说!');*/
+                }
+            });
+        }
+        /* 模拟iframe的onclick事件 */
+        var IframeOnClick = {
+            resolution: 200,
+            iframes: [],
+            interval: null,
+            Iframe: function() {
+                this.element = arguments[0];
+                this.cb = arguments[1];
+                this.hasTracked = false;
+            },
+            track: function(element, cb) {
+                this.iframes.push(new this.Iframe(element, cb));
+                if (!this.interval) {
+                    var _this = this;
+                    this.interval = setInterval(function() { _this.checkClick(); }, this.resolution);
+                }
+            },
+            checkClick: function() {
+                if (document.activeElement) {
+                    var activeElement = document.activeElement;
+                    for (var i in this.iframes) {
+                        if (activeElement === this.iframes[i].element) { // user is in this Iframe
+                            if (this.iframes[i].hasTracked == false) {
+                                this.iframes[i].cb.apply(window, []);
+                                this.iframes[i].hasTracked = true;
+                            }
+                        } else {
+                            this.iframes[i].hasTracked = false;
+                        }
+                    }
+                }
+            }
+        };
+
+        function linkbtn(e){
+            $(e).siblings('.tpl-left-nav-sub-menu').slideToggle(80)
+                .end()
+                .find('.tpl-left-nav-more-ico').toggleClass('tpl-left-nav-more-ico-rotate');
+
+        }
+
+
+        function getParent(pid,rst,arrlen){
+            if(rst==undefined){
+                return;
+            }
+            for(var i=0,len=arrlen;i<len;i++){
+                var rsts=rst[i].id;
+                if(rsts==pid){
+                    return rst[i];
+                }
+            }
+        }
+        function openpage(src,id){
+            ifrmethodid=id;
+            document.getElementById("rightparent").src=src;
+        };
+
+        //退出登录   清除cookies
+        function signout(){
+            document.cookie = 'VMS_LoginName=-1;expires=-1';
+            interurl="";
+            document.cookie = 'VMS_IP=-1;expires=-1';
+            document.cookie = 'VMS_Power=-1;expires=-1';
+            document.cookie = 'VMS_Pwd=-1;expires=-1';
+            window.location.href = "login.html";
+        }
+
+        //清除修改以及添加面板所输入的内容
+        function clearpanel(){
+            $("#onenum").val("");
+            $("#nnum").val("");
+            $("#rettimeout").val("");
+            $("#ondeltime").val("");
+            $("#ondeltime").prop("checked",false);
+            $("#ondeltime").prop("voice",false);
+        }
+
+        //打开设备参数配置面板
+        function openconfig(){
+            clearpanel();
+            //修改前查询数据为面板赋值
+            $.ajax({
+                url:'queryAppConfig',
+                type:'post',
+                dataType:'json',
+                contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+                success:function(data){
+                    console.info(data);
+                    $("#onenum").val(data.cardScore);
+                    $("#nnum").val(data.oneVsMoreScore);
+                    $("#rettimeout").val(data.backHome);
+                    $("#ondeltime").val(data.openDoor);
+                    $("#preservation_day").val(data.preservation_day);
+
+                    $("#vmsip").val(data.vmsIP);
+                    $("#vmsport").val(data.vmsProt);
+                    $("#vmsuser").val(data.vmsUserName);
+                    $("#vmspwd").val(data.vmsPassWord);
+                    $('#my-prompt2').modal({
+                        relatedTarget: this,
+                        onConfirm: function(e) {
+                            $.ajax({
+                                url:'updateAppConfig',
+                                type:'post',
+                                dataType:'json',
+                                data:{
+                                    onenum:$("#onenum").val(),
+                                    nnum:$("#nnum").val(),
+                                    rettimeout:$("#rettimeout").val(),
+                                    ondeltime:$("#ondeltime").val(),
+                                    preservation_day:$("#preservation_day").val(),
+                                    vmsip:$("#vmsip").val(),
+                                    vmsport:$("#vmsport").val(),
+                                    vmsuser:$("#vmsuser").val(),
+                                    vmspwd:$("#vmspwd").val()
+                                },
+                                contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+                                success:function(data){
+                                    console.info(data);
+                                    if(data.code!=200){
+                                        swal("错误", data.message, "error");
+                                    }else{
+                                        swal("成功",data.message,"success");
+                                    }
+                                },
+                                error:function(data){
+                                    /* swal("错误", "检测人脸失败", "error"); */
+                                    console.info("456");
+                                }
+                            });
+                        },
+                        onCancel: function(e) {
+                            /*alert('不想说!');*/
+                        }
+                    });
+
+                },
+                error:function(data){
+                    console.info("456");
+                }
+            });
+        }
+
+    </script>
+    <link rel="stylesheet" href="css/amazeui.min.css"/>
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/sweet-alert.css">
+</head>
+<body data-type="index" style="border:1px solid white;height:100%;background-color:white;"
+      oncontextmenu='return false'>
+<div id="menutest">
+    <!-- <ul class="tpl-left-nav-sub-menu">
+        <li>
+            <a href="javascript:openpage('Equipment_record.html');" oncontextmenu="menus()"  style="outline: none;" class="nav-link tpl-left-nav-link-list">
+                <i class="am-icon-angle-right" style="margin-left:40px;"></i>
+                    <span id="top"></span>
+                <i class="am-icon-angle-right tpl-left-nav-more-ico am-fr am-margin-right"></i>
+            </a>
+        </li>
+    </ul> -->
+</div>
+
+<header class="am-topbar am-topbar-inverse admin-header" style="position:absolute;">
+    <!-- 头部logo -->
+    <div class="am-topbar-brand">
+        <a href="javascript:openpage('main.html');;"><!-- class="tpl-logo" -->
+            <span style="color: #0f9ae0;font-size:24px;line-height: 24px;">
+                    &nbsp;&nbsp;<img src="../img/runvisionlogo.gif" width="45px" height="45px"/>&nbsp;&nbsp;&nbsp;人脸识别管理系统
+                </span>
+        </a>
+    </div>
+    <button class="am-topbar-btn am-topbar-toggle am-btn am-btn-sm am-btn-success am-show-sm-only"
+            data-am-collapse="{target: '#topbar-collapse'}"><span class="am-sr-only">导航切换</span>
+        <span class="am-icon-bars"></span></button>
+
+    <div class="am-collapse am-topbar-collapse" style="box-shadow: 0px 1rem 1rem #f4f4f4;"
+         id="topbar-collapse">
+
+        <ul class="am-nav am-nav-pills am-topbar-nav am-topbar-right admin-header-list tpl-header-list">
+
+            <li class="am-dropdown" data-am-dropdown data-am-dropdown-toggle><img id="statulamp"
+                                                                                  src="../img/stop.png"
+                                                                                  width="14px"
+                                                                                  height="14px"
+                                                                                  alt="状态指示灯"/></li>
+
+            <!-- 进度栏 -->
+            <li class="am-dropdown" data-am-dropdown data-am-dropdown-toggle>
+                <a style="color:black;" href="javascript:openconfig();">
+                    <span class="am-icon-calendar"> 设备参数配置
+                        <!--<span class="am-badge tpl-badge-primary am-round">4</span>--></span>
+                </a>
+            </li>
+            <li class="am-dropdown" data-am-dropdown data-am-dropdown-toggle>
+                <a style="color:black;" id="loginbtn">
+                    <span class="am-icon-user" id="logintxt"> 登录
+                        <!--<span class="am-badge tpl-badge-primary am-round">4</span>--></span>
+                </a>
+            </li>
+
+            <!-- 全屏按钮 -->
+            <!-- <li class="am-hide-sm-only"><a href="javascript:;" id="admin-fullscreen" class="tpl-header-list-link"><span class="am-icon-arrows-alt"></span> <span class="admin-fullText">开启全屏</span></a></li> -->
+
+
+            <li><a href="javascript:signout()" class="tpl-header-list-link"><span
+                    class="am-icon-sign-out tpl-header-list-ico-out-size"></span></a></li>
+        </ul>
+    </div>
+</header>
+
+<div class="tpl-page-container tpl-page-header-fixed"
+     style="padding-top:20px;padding-left:0px;padding-right:0px;margin-right: 0px;margin-left: 0px;height:90%;">
+    <div class="tpl-content-wrapper" style="padding:10px 20px 0px 20px;margin:0px;">
+        <!-- <div class="tpl-content-page-title">
+             Amaze UI 首页组件
+         </div>-->
+
+        <div class="row">
+            <div class="am-u-lg-3 am-u-md-6 am-u-sm-12" style="cursor: pointer;"
+                 onclick="javascript:openpage('Contrast_record.html');">
+                <div class="dashboard-stat blue">
+                    <div class="visual">
+                        <i class="am-icon-comments-o"></i>
+                    </div>
+                    <div class="details">
+                        <div class="number"></div>
+                        <div class="desc"> 1:1比对记录</div>
+                    </div>
+                    <a class="more" href="#"> 查看详情
+                        <i class="m-icon-swapright m-icon-white"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="am-u-lg-3 am-u-md-6 am-u-sm-12" style="cursor: pointer;"
+                 onclick="javascript:openpage('FaceCon_record.html');">
+                <div class="dashboard-stat green">
+                    <div class="visual">
+                        <i class="am-icon-bar-chart-o"></i>
+                    </div>
+                    <div class="details">
+                        <div class="number"></div>
+                        <div class="desc"> 1:N比对记录</div>
+                    </div>
+                    <a class="more" href="#"> 查看详情
+                        <i class="m-icon-swapright m-icon-white"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="am-u-lg-3 am-u-md-6 am-u-sm-12" style="cursor: pointer;"
+                 onclick="javascript:openpage('FaceLibrary_record.html');">
+                <div class="dashboard-stat red">
+                    <div class="visual">
+                        <i class="am-icon-apple"></i>
+                    </div>
+                    <div class="details">
+                        <div class="number"></div>
+                        <div class="desc"> 人脸模板库管理</div>
+                    </div>
+                    <a class="more" href="#"> 查看详情
+                        <i class="m-icon-swapright m-icon-white"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="am-u-lg-3 am-u-md-6 am-u-sm-12" style="cursor: pointer;"
+                 onclick="javascript:openpage('Attendance_record.html');">
+                <div class="dashboard-stat purple">
+                    <div class="visual">
+                        <i class="am-icon-android"></i>
+                    </div>
+                    <div class="details">
+                        <div class="number"></div>
+                        <div class="desc"> 考勤记录管理</div>
+                    </div>
+                    <a class="more" href="#"> 查看详情
+                        <i class="m-icon-swapright m-icon-white"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 右方主容器 -->
+    <div style="width:99%;height:84.2%;margin:0px auto;padding:0px;border-radius:5px;">
+        <iframe name="rightparent" id="rightparent" src="Contrast_record.html" width="100%"
+                height="100%"
+                style="overflow-y: hidden;padding:0px;border-radius:5px;background-image:url('img/bodybg.jpg');background-size:100% 100%;">
+
+
+        </iframe>
+    </div>
+
+
+</div>
+
+<!-- 修改设备信息面板 -->
+<div class="am-modal am-modal-prompt" tabindex="-1" id="my-prompt2">
+    <div class="am-modal-dialog">
+        <div class="am-modal-hd" id="equtitle"
+             style="border-bottom:1px solid gray;">设备参数配置
+        </div>
+        <div class="am-modal-bd">
+            <div style="text-align: left;">
+                <fieldset>
+                    <legend>基本参数配置</legend>
+                    <table style="width:100%;height:100%;text-align: center;border-collapse:separate; border-spacing:0px 5px;">
+                        <tr>
+                            <td style="text-align:right;width:120px;">1:1核验阈值：</td>
+                            <td style="text-align: left;width:250px;"><input
+                                    type="text"
+                                    style="border:1px solid #bfbdbd;width:290px;outline: none;"
+                                    id="onenum"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:right;">1:N核验阈值：</td>
+                            <td style="text-align: left;width:250px;"><input
+                                    type="text"
+                                    style="border:1px solid #bfbdbd;width:290px;outline: none;"
+                                    id="nnum"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:right;">返回待机等待时间：</td>
+                            <td style="text-align: left;width:250px;"><input
+                                    type="text"
+                                    style="border:1px solid #bfbdbd;width:290px;outline: none;"
+                                    id="rettimeout"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:right;">开门延时时间：</td>
+                            <td style="text-align: left;width:250px;"><input
+                                    type="text"
+                                    style="border:1px solid #bfbdbd;width:290px;outline: none;"
+                                    id="ondeltime"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:right;">数据保留时间：(天)</td>
+                            <td>
+                                <select id="preservation_day" style="outline:none;border-radius:3px;width:200px;height:32px;font-family: '微软雅黑';font-size:14px;">
+                                    <option value="30">30</option>
+                                    <option value="60">60</option>
+                                    <option value="90">90</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                </fieldset>
+
+
+                <fieldset>
+                    <legend>FaceVMS</legend>
+                    <table width="100%" style="border-collapse:separate; border-spacing:0px 5px;">
+                        <tr>
+                            <td style="text-align:right;">IP地址：</td>
+                            <td><input type="text"
+                                       style="border:1px solid #bfbdbd;outline: none;width:180px;"
+                                       id="vmsip"/>
+                            </td>
+                            <td style="text-align:right;">端口号：</td>
+                            <td><input type="text"
+                                       style="border:1px solid #bfbdbd;outline: none;width:180px;"
+                                       id="vmsport"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:right;">设备编号：</td>
+                            <td><input type="text"
+                                       style="border:1px solid #bfbdbd;outline: none;width:180px;"
+                                       id="vmsuser"/>
+                            </td>
+                            <td style="text-align:right;">验证口令：</td>
+                            <td><input type="text"
+                                       style="border:1px solid #bfbdbd;outline: none;width:180px;"
+                                       id="vmspwd"/>
+                            </td>
+                        </tr>
+                    </table>
+                </fieldset>
+                <p style="margin:0px;padding:0px;"></p>
+                <div style="padding: 0px;margin-left:20px;text-align:center;">
+
+                    <span></span> <span></span>
+                </div>
+            </div>
+        </div>
+        <div class="am-modal-footer">
+            <span class="am-modal-btn" data-am-modal-cancel>取消</span> <span
+                class="am-modal-btn" data-am-modal-confirm>提交</span>
+        </div>
+    </div>
+</div>
+
+
+</body>
+<script src="../js/amazeui.min.js"></script>
+<script src="../js/iscroll.js"></script>
+<script src="../js/app.js"></script>
+
+</html>

@@ -1,0 +1,95 @@
+
+body {margin:0 auto;overflow:hidden;boeder:none;}  
+
+/*=============????=============*/	
+.header{
+	margin:0 auto;
+	width:100%;
+	height:100%;
+/* 	background-color:#000; */
+	position:relative;
+	overflow:hidden;
+	}
+.header canvas {
+	width:100%;height:auto/*????????? ???????????640px*/;
+	display:inline-block;vertical-align:baseline;
+	position:absolute;
+	z-index:-1;
+	}
+.header .canvaszz{  /*???????????????????????????????????*/
+	width:100%;
+	background-size:100% 100%;
+	height:100%;
+	position:absolute;
+	z-index:10;
+		filter:alpha(opacity=40);  
+      	-moz-opacity:0.4;  
+      	-khtml-opacity: 0.4;  
+      	opacity: 0.4;
+	}
+
+.audio{ 
+/*???????????λ??*/
+	width:45px;
+	position:fixed;top:65px;left:94%;
+	z-index:11;
+	filter:alpha(opacity=30);  
+      -moz-opacity:0.3;  
+      -khtml-opacity: 0.3;  
+      opacity: 0.3;
+	}
+.header .top_logo{
+	/*background-image: url(img/top_logo.png);*/
+	margin:0 auto;
+	width:750px;
+	height:200px;
+	position:absolute;
+	z-index:30;
+	top:10px;
+	left: 50%;
+	margin-left: -390px;
+	}	
+
+.header .nav{
+	width:804px;
+	height: 804px;
+	position:absolute;
+	z-index:30;
+	top:50%;
+	left: 50%;
+	margin-left: -550px;
+	margin-top: -300px;
+    text-align: center;
+    vertical-align: central;
+	}
+.header .nav a.gv { 
+	text-decoration:none;
+	width: 500px; 
+	height: 43px; 
+	display: block; 
+	text-align:center;		/*??????*/
+	line-height:43px;  /*???????*/
+	cursor:pointer;
+	float:left;/*???*/
+	margin:8px 2px 8px 2px;
+	font:43px/43px 'microsoft yahei'; color:#066197;
+	}
+.header .nav a.gv span {
+	 display: none;
+	 	
+}
+.header .nav a.gv:hover {
+	color:#1d7eb8;
+	-webkit-box-shadow: 0 0 6px #1d7eb8;
+	transition-duration: 0.5s;
+	}
+	
+.header	.topcn{
+	width: 980px;
+	top:200px;
+	left: 50%;
+	margin-left: -490px;
+	position:absolute;
+	z-index:20;
+
+	}
