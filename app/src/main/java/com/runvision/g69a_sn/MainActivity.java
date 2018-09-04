@@ -241,7 +241,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                                     }
                                 }
                             }
-
                         }
                    // }
 
@@ -593,7 +592,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         usbDeviceStateFilter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
         registerReceiver(mUsbReceiver, usbDeviceStateFilter);
         startIDCardReader();
-
 
         if(uithread==null) {
             uithread = new UIThread();
