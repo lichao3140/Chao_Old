@@ -107,9 +107,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
 
     private ImageView home_set;
 
-
     private View pro_xml;//刷卡标记
-
 
     public int logshowflag = 0;
 
@@ -152,8 +150,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
     private TextView showHttpUrl;
     private ServerManager serverManager;
     private int socketErrorNum = 0;
-
-
 
     private Dialog dialog = null;
     private int templatenum=0;
