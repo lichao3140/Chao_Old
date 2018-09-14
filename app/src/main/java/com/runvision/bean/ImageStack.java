@@ -36,7 +36,6 @@ public class ImageStack {
 
     /**
      * 入堆
-     *
      * @param
      */
     public void pushImageInfo(byte[] imgData, long time) {

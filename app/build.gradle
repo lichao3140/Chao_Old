@@ -38,6 +38,8 @@ dependencies {
     implementation files('libs/facerecognition.jar')
     implementation files('libs/zkandroidcore.jar')
     implementation files('libs/zkandroididcardreader.jar')
+    implementation files('libs/arcsoft_liveness.jar')
+    implementation files('libs/facetracking.jar')
     implementation 'com.yanzhenjie:andserver:1.1.4'
     implementation 'com.google.code.gson:gson:2.8.0'
 }

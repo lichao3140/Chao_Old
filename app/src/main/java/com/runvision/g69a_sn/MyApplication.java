@@ -54,16 +54,16 @@ public class MyApplication extends Application {
 
     @Override
     public void onCreate() {
-        // TODO Auto-generated method stub
         super.onCreate();
         myApplication = this;
         context = getApplicationContext();
         GPIOHelper.init();
-      //  initLeakCanary();
+       // initLeakCanary();
         //初始化日志打印
         LogToFile.init(this);
         String serlia = getSerialNumber();
-        if (serlia.equals("") || serlia.length() < 4 || !serlia.substring(0, 4).equals("R50A")) {
+        // 3288 开发板没有序列号
+       if (serlia.equals("") || serlia.length() < 4 || !serlia.substring(0, 4).equals("R50A")) {
             LogToFile.e(TAG,"该设备没有序列号");
             finishActivity();
         }

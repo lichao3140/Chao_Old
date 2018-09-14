@@ -28,9 +28,7 @@ public class Const {
 
     public static int CARD_HEIGTH = 126;//身份证图片的高度
 
-
     public static int COMPER_NUM = 10;
-
 
    // public static float comper_socre = 0.65f;//1：N阈值
 
@@ -62,6 +60,13 @@ public class Const {
     public static final String APP_ID = "J3Yscp63XC1M1ut6Fk6DguT9pEGgKYkXZVcfUQmsFDZC";
     public static final String APP_KEY_FD = "4wY3J6N2MQvjY1wAtg51niqvMheQ57mU2VdZ9e6gP2kB";
     public static final String APP_KEY_FR = "4wY3J6N2MQvjY1wAtg51nir3X6uX5LAVPFCXTXVeXRD7";
+
+    // 活体检测
+    public static final String FREESDKAPPID = "J3Yscp63XC1M1ut6Fk6DguTmdEaYzya4tb3teTZZZbAp";
+    public static final String FDSDKKEY = "5VkbWAVASfvjVKGnnkdzu5n6xQgpjRKT2Acr8dzgsqzE";
+    public static final String FTSDKKEY = "5VkbWAVASfvjVKGnnkdzu5myo1RheXt6ToyELTBqvvgu";
+    public static final String LIVENESSAPPID = "J3Yscp63XC1M1ut6Fk6DguUGGqdGZocc2c8QK2GfnzTt";
+    public static final String LIVENESSSDKKEY = "9LQgVXRmKTXtph3pbzibo9mCErzEC5Gg8yjX3JyU79FP";
 
     //记录人脸定位算法是否成功
     public static boolean afdInit = false;

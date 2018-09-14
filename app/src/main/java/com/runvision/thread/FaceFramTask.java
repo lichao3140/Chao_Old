@@ -55,6 +55,7 @@ public class FaceFramTask extends AsyncTask<Void, Rect, Void> {
         this.mCameraView = mCameraView;
         imageStack = mCameraView.getImgStack();
     }
+
     @Override
     protected Void doInBackground(Void... params) {
         while (isRuning) {
@@ -73,7 +74,7 @@ public class FaceFramTask extends AsyncTask<Void, Rect, Void> {
                 }
 
             } else {
-               // Log.i(TAG, "无人脸");
+                //Log.i(TAG, "无人脸");
                 faceflag=false;
                 publishProgress(new Rect(0, 0, 0, 0));
             }

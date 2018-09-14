@@ -15,16 +15,14 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-
 import com.runvision.bean.ImageStack;
 import com.runvision.core.Const;
+import com.runvision.g69a_sn.MainActivity;
 import com.runvision.thread.FaceFramTask;
-
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-;
 
 /**
  * Created by Administrator on 2018/6/1.
@@ -34,6 +32,8 @@ public class MyCameraSuf extends SurfaceView implements SurfaceHolder.Callback, 
     private static final String TAG = "sulin";
     private SurfaceHolder mSurfaceHolder;
     private Camera mCamera;
+    private int mWidth;
+    private int mHeight;
     private Context mContext;
     private Camera.Parameters parameters;
     private FaceFramTask task;
@@ -84,8 +84,9 @@ public class MyCameraSuf extends SurfaceView implements SurfaceHolder.Callback, 
         }
         releaseCamera();
         try {
-
-            mCamera = Camera.open();
+           mCamera = Camera.open();
+            // 3288 开发板摄像头
+            //mCamera = Camera.open(0);
         } catch (Exception e) {
             mCamera = null;
             Log.d("sulin", "openCamera: open相机失败");
@@ -120,10 +121,7 @@ public class MyCameraSuf extends SurfaceView implements SurfaceHolder.Callback, 
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
-
-
 
     }
 
@@ -185,12 +183,12 @@ public class MyCameraSuf extends SurfaceView implements SurfaceHolder.Callback, 
     @Override
     public void onPreviewFrame(byte[] bytes, Camera camera) {
         imgStack.pushImageInfo(bytes, System.currentTimeMillis());
+        MainActivity.detect(bytes, 640, 480);
     }
 
-  /*  @Override
+    /*@Override
     public void onPreviewFrame(byte[] data, Camera camera) {
         //Log.d(TAG, "onPreviewFrame: ...........");
-
         mCameraData = data;
 
         if (mCameraData == null) {
@@ -211,14 +209,9 @@ public class MyCameraSuf extends SurfaceView implements SurfaceHolder.Callback, 
                     break;
             }
         }
-
         task = new FaceFramTask(this);
         task.execute();
-
     }*/
-
-
-
 
     private Paint mPaint;
     private float nFaceLeft, nFaceTop, nFaceRight, nFaceBottom; // 人脸坐标
