@@ -12,6 +12,7 @@ import com.runvision.bean.AppData;
 import com.runvision.bean.FaceInfo;
 import com.runvision.bean.ImageStack;
 import com.runvision.core.Const;
+import com.runvision.g69a_sn.MainActivity;
 import com.runvision.g69a_sn.MyApplication;
 import com.runvision.myview.MyCameraSuf;
 import com.runvision.utils.CameraHelp;
@@ -33,6 +34,7 @@ public class FaceFramTask extends AsyncTask<Void, Rect, Void> {
     private MyCameraSuf mCameraView;
     List<AFD_FSDKFace> result = new ArrayList<AFD_FSDKFace>();
     byte[] des;
+    byte[] livedata;
     private boolean flag=false;
     public static boolean faceflag=false;
 
@@ -60,12 +62,13 @@ public class FaceFramTask extends AsyncTask<Void, Rect, Void> {
     protected Void doInBackground(Void... params) {
         while (isRuning) {
             des= CameraHelp.rotateCamera(imageStack.pullImageInfo().getData(), 640, 480, 270);
+            livedata = MyCameraSuf.getmCameraData();
             MyApplication.mFaceLibCore.FaceDetection(des, 480, 640, result);
             if (result.size() != 0) {
                // Log.i(TAG, result.get(0).getRect().left + "," + result.get(0).getRect().top);
                 publishProgress(result.get(0).getRect());
                 faceflag=true;
-                if(!flag) {
+                if(!flag && MainActivity.detect(livedata, 640, 480)) {
                     FaceInfo info = new FaceInfo(des, result.get(0));
                     Message msg = new Message();
                     msg.obj = info;

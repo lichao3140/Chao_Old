@@ -417,8 +417,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                     if (count1 == 0) {
                         home_layout.setVisibility(View.GONE);
                         // 开启人脸比对线程
-                        //stratThread();
-                        detect(mCameraSurfView.getmCameraData(), 640, 480);
+                        stratThread();
                         Infra_red = true;
                         bStop = false;
 
@@ -739,7 +738,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
     }
 
     /**
-     * 开启人脸识别线程
+     * 开启画人脸框线程
      */
     private void stratThread() {
         if (faceDetectTask != null) {
@@ -847,14 +846,14 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         //  Log.i("Gavin","oneCompareScore:"+AppData.getAppData().getoneCompareScore());
     }
 
-    public void detect(final byte[] data, int mWidth, int mHeight) {
+    public static boolean detect(final byte[] data, int mWidth, int mHeight) {
         List<AFT_FSDKFace> ftFaceList = new ArrayList<>();
         //视频FT检测人脸
         int ftCode = ftEngine.AFT_FSDK_FaceFeatureDetect(data, mWidth, mHeight,
                 AFT_FSDKEngine.CP_PAF_NV21, ftFaceList).getCode();
         if (ftCode != AFT_FSDKError.MOK) {
             Log.i(TAG, "AFT_FSDK_FaceFeatureDetect: errorcode " + ftCode);
-            return;
+            return false;
         }
         int maxIndex = ImageUtils.findFTMaxAreaFace(ftFaceList);
         final List<com.arcsoft.liveness.FaceInfo> faceInfos = new ArrayList<>();
@@ -867,26 +866,29 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         List<LivenessInfo> livenessInfos = new ArrayList<>();
         ErrorInfo livenessError = livenessEngine.startLivenessDetect(data, mWidth, mHeight,
                 LivenessEngine.CP_PAF_NV21, faceInfos, livenessInfos);
-        //Log.i("lichao", "startLiveness: errorcode " + livenessError.getCode());
+        Log.i("lichao", "startLiveness: errorcode " + livenessError.getCode());
         if (livenessError.getCode() == ErrorInfo.MOK) {
             if (livenessInfos.size() == 0) {
                 Log.e("lichao", "无人脸");
-                return;
+                return false;
             }
             final int liveness = livenessInfos.get(0).getLiveness();
             //Log.i("lichao", "getLivenessScore: liveness " + liveness);
             if (liveness == LivenessInfo.NOT_LIVE) {
                 Log.e("lichao", "非活体");
+                return false;
             } else if (liveness == LivenessInfo.LIVE) {
                 Log.e("lichao", "活体");
-                // 开启一比n处理
-                stratThread();
+                return true;
             } else if (liveness == LivenessInfo.MORE_THAN_ONE_FACE) {
                 Log.e("lichao", "非单人脸信息");
+                return false;
             } else {
                 Log.e("lichao", "未知");
+                return false;
             }
         }
+        return false;
     }
 
 
