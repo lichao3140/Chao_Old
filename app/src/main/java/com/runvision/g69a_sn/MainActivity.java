@@ -416,7 +416,9 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                     }
                     if (count1 == 0) {
                         home_layout.setVisibility(View.GONE);
+                        // 开启人脸比对线程
                         //stratThread();
+                        detect(mCameraSurfView.getmCameraData(), 640, 480);
                         Infra_red = true;
                         bStop = false;
 
@@ -537,7 +539,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
             }
         }
     };
-
 
     /**
      * ACTIVITY周期
@@ -677,7 +678,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         }
         IDCardReaderFactory.destroy(idCardReader);
         unregisterReceiver(mUsbReceiver);
-        //   MyApplication.mFaceLibCore.AFR_FSDK_UninitialEngine();
+        //MyApplication.mFaceLibCore.AFR_FSDK_UninitialEngine();
     }
 
     @Override
@@ -759,7 +760,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
             OneVsMoreThread thread = new OneVsMoreThread(info);
             thread.start();
         }
-
     }
 
     /**
@@ -847,7 +847,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         //  Log.i("Gavin","oneCompareScore:"+AppData.getAppData().getoneCompareScore());
     }
 
-    public static void detect(final byte[] data, int mWidth, int mHeight) {
+    public void detect(final byte[] data, int mWidth, int mHeight) {
         List<AFT_FSDKFace> ftFaceList = new ArrayList<>();
         //视频FT检测人脸
         int ftCode = ftEngine.AFT_FSDK_FaceFeatureDetect(data, mWidth, mHeight,
@@ -874,13 +874,13 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                 return;
             }
             final int liveness = livenessInfos.get(0).getLiveness();
-            Log.i("lichao", "getLivenessScore: liveness " + liveness);
+            //Log.i("lichao", "getLivenessScore: liveness " + liveness);
             if (liveness == LivenessInfo.NOT_LIVE) {
                 Log.e("lichao", "非活体");
             } else if (liveness == LivenessInfo.LIVE) {
                 Log.e("lichao", "活体");
                 // 开启一比n处理
-                //stratThread();
+                stratThread();
             } else if (liveness == LivenessInfo.MORE_THAN_ONE_FACE) {
                 Log.e("lichao", "非单人脸信息");
             } else {

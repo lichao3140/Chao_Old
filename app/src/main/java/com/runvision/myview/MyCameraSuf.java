@@ -77,7 +77,6 @@ public class MyCameraSuf extends SurfaceView implements SurfaceHolder.Callback, 
         setWillNotDraw(false);
     }
 
-
     public void openCamera() {
         if (cameraStaus) {
             return;
@@ -85,8 +84,6 @@ public class MyCameraSuf extends SurfaceView implements SurfaceHolder.Callback, 
         releaseCamera();
         try {
            mCamera = Camera.open();
-            // 3288 开发板摄像头
-            //mCamera = Camera.open(0);
         } catch (Exception e) {
             mCamera = null;
             Log.d("sulin", "openCamera: open相机失败");
@@ -122,13 +119,10 @@ public class MyCameraSuf extends SurfaceView implements SurfaceHolder.Callback, 
                 e.printStackTrace();
             }
         }
-
     }
-
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-
         Log.i(TAG, "surfaceCreated...:"+cameraStaus);
         openCamera();
 
@@ -145,7 +139,6 @@ public class MyCameraSuf extends SurfaceView implements SurfaceHolder.Callback, 
         Log.i(TAG, "surfaceDestroyed..."+cameraStaus);
         releaseCamera();
     }
-
 
     public synchronized void releaseCamera() {
         if (!cameraStaus) {
@@ -183,7 +176,12 @@ public class MyCameraSuf extends SurfaceView implements SurfaceHolder.Callback, 
     @Override
     public void onPreviewFrame(byte[] bytes, Camera camera) {
         imgStack.pushImageInfo(bytes, System.currentTimeMillis());
-        MainActivity.detect(bytes, 640, 480);
+        mCameraData = bytes;
+
+        if (mCameraData == null) {
+            return;
+        }
+        //MainActivity.detect(bytes, 640, 480);
     }
 
     /*@Override
@@ -269,15 +267,6 @@ public class MyCameraSuf extends SurfaceView implements SurfaceHolder.Callback, 
          */
         mPaint.setStrokeWidth(3);
 
-
-        /**
-         * 获取屏幕的宽高
-         */
-        //
-
-        //
-        // Log.i("test", mProportionW + "*11**" + mProportionH);
-
     }
 
     private int mScreenWidth;
@@ -307,6 +296,5 @@ public class MyCameraSuf extends SurfaceView implements SurfaceHolder.Callback, 
             this.nFaceBottom = rect.bottom * mProportionH;
         }
         postInvalidate();
-
     }
 }
