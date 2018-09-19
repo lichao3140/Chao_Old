@@ -8,7 +8,7 @@ import android.util.Log;
 import com.runvision.bean.WebDataResultJson;
 import com.runvision.core.Const;
 import com.runvision.db.User;
-import com.runvision.g69a_sn.MyApplication;
+import com.runvision.g68a_sn.MyApplication;
 import com.runvision.utils.FileUtils;
 import com.runvision.utils.JsonUtils;
 import com.yanzhenjie.andserver.RequestHandler;

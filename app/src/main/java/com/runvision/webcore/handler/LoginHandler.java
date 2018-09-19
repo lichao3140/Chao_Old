@@ -18,7 +18,7 @@ package com.runvision.webcore.handler;
 import com.google.gson.Gson;
 import com.runvision.bean.WebDataResultJson;
 import com.runvision.db.Admin;
-import com.runvision.g69a_sn.MyApplication;
+import com.runvision.g68a_sn.MyApplication;
 import com.yanzhenjie.andserver.RequestHandler;
 import com.yanzhenjie.andserver.RequestMethod;
 import com.yanzhenjie.andserver.annotation.RequestMapping;

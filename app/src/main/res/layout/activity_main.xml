@@ -4,7 +4,7 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:context="com.runvision.g69a_sn.MainActivity">
+                tools:context="com.runvision.g68a_sn.MainActivity">
 
 
     <FrameLayout
@@ -15,7 +15,7 @@
         <com.runvision.myview.MyCameraSuf
             android:id="@+id/myCameraView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"/>
 
         <ImageView
             android:id="@+id/home_set"

@@ -42,6 +42,11 @@ import com.yanzhenjie.andserver.Server;
 import com.yanzhenjie.andserver.filter.HttpCacheFilter;
 import com.yanzhenjie.andserver.website.AssetsWebsite;
 
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -124,7 +129,8 @@ public class CoreService extends Service {
     private void startServer() {
         if (mServer != null) {
             if (mServer.isRunning()) {
-                String hostAddress = mServer.getInetAddress().getHostAddress();
+//                String hostAddress = mServer.getInetAddress().getHostAddress();
+                String hostAddress = getHostIP();
                 ServerManager.serverStart(CoreService.this, hostAddress);
             } else {
                 mServer.startup();
@@ -146,4 +152,36 @@ public class CoreService extends Service {
     public IBinder onBind(Intent intent) {
         return null;
     }
+
+    /**
+     * 获取ip地址
+     * @return
+     */
+    public String getHostIP() {
+        String hostIp = null;
+        try {
+            Enumeration nis = NetworkInterface.getNetworkInterfaces();
+            InetAddress ia = null;
+            while (nis.hasMoreElements()) {
+                NetworkInterface ni = (NetworkInterface) nis.nextElement();
+                Enumeration<InetAddress> ias = ni.getInetAddresses();
+                while (ias.hasMoreElements()) {
+                    ia = ias.nextElement();
+                    if (ia instanceof Inet6Address) {
+                        continue;// skip ipv6
+                    }
+                    String ip = ia.getHostAddress();
+                    if (!"127.0.0.1".equals(ip)) {
+                        hostIp = ia.getHostAddress();
+                        break;
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+        return hostIp;
+
+    }
+
 }

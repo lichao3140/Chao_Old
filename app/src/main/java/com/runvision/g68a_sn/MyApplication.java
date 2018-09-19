@@ -1,4 +1,4 @@
-package com.runvision.g69a_sn;
+package com.runvision.g68a_sn;
 
 import android.app.Activity;
 import android.app.Application;
@@ -28,7 +28,6 @@ import java.util.Map;
 /**
  * Created by Administrator on 2018/6/5.
  */
-
 public class MyApplication extends Application {
     private String TAG = "MyApplication";
 
@@ -62,17 +61,17 @@ public class MyApplication extends Application {
         //初始化日志打印
         LogToFile.init(this);
         String serlia = getSerialNumber();
-        // 3288 开发板没有序列号
-       if (serlia.equals("") || serlia.length() < 4 || !serlia.substring(0, 4).equals("R50A")) {
-            LogToFile.e(TAG,"该设备没有序列号");
-            finishActivity();
-        }
+        // G68A设备没有序列号
+//       if (serlia.equals("") || serlia.length() < 4 || !serlia.substring(0, 4).equals("R50A")) {
+//            LogToFile.e(TAG,"该设备没有序列号");
+//            finishActivity();
+//        }
 
         int ret = mFaceLibCore.initLib();
         if (ret == 0) {
             Toast.makeText(this, "算法初始化成功", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "算法初始化失败", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "算法初始化失败" + ret, Toast.LENGTH_SHORT).show();
         }
         faceProvider=new FaceProvider(this);
         if (faceProvider.querAdminSize() == 0) {
@@ -80,7 +79,6 @@ public class MyApplication extends Application {
         }
 
         loadTemper();
-
     }
 
 
@@ -101,16 +99,12 @@ public class MyApplication extends Application {
 
     }
 
-
-
     public String getSerialNumber() {
         String serial = "";
         try {
             Class<?> c = Class.forName("android.os.SystemProperties");
-
             Method get = c.getMethod("get", String.class);
             serial = (String) get.invoke(c, "ro.serialno");
-
         } catch (Exception e) {
             Log.i("error", e.getMessage());
         }
@@ -124,7 +118,6 @@ public class MyApplication extends Application {
    //     }
    //     LeakCanary.install(this);
    // }
-
 
     public void init() {
         // 设置该CrashHandler为程序的默认处理器
@@ -158,8 +151,6 @@ public class MyApplication extends Application {
         // 杀死该应用进程
         android.os.Process.killProcess(android.os.Process.myPid());
     }
-
-
 
     /**
      * @param path
@@ -199,7 +190,6 @@ public class MyApplication extends Application {
         }
         return null;
     }
-
 
 
     public void setCaptureImage(Uri uri) {

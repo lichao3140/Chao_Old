@@ -20,7 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
-import com.runvision.g69a_sn.MainActivity;
+import com.runvision.g68a_sn.MainActivity;
 
 /**
  * Created by Yan Zhenjie on 2017/3/17.

@@ -4,7 +4,7 @@ import com.runvision.bean.Sex;
 import com.runvision.bean.Type;
 import com.runvision.bean.WebDataResultJson;
 import com.runvision.db.User;
-import com.runvision.g69a_sn.MyApplication;
+import com.runvision.g68a_sn.MyApplication;
 import com.runvision.utils.JsonUtils;
 import com.yanzhenjie.andserver.RequestHandler;
 import com.yanzhenjie.andserver.util.HttpRequestParser;

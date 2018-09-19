@@ -10,7 +10,7 @@ import com.runvision.bean.Type;
 import com.runvision.bean.WebDataResultJson;
 import com.runvision.core.Const;
 import com.runvision.db.User;
-import com.runvision.g69a_sn.MyApplication;
+import com.runvision.g68a_sn.MyApplication;
 import com.runvision.utils.CameraHelp;
 import com.runvision.utils.DateTimeUtils;
 import com.runvision.utils.FileUtils;

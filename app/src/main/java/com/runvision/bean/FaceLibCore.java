@@ -10,9 +10,16 @@ import com.arcsoft.facerecognition.AFR_FSDKEngine;
 import com.arcsoft.facerecognition.AFR_FSDKError;
 import com.arcsoft.facerecognition.AFR_FSDKFace;
 import com.arcsoft.facerecognition.AFR_FSDKMatching;
+import com.arcsoft.facetracking.AFT_FSDKEngine;
+import com.arcsoft.facetracking.AFT_FSDKError;
+import com.arcsoft.liveness.ErrorInfo;
+import com.arcsoft.liveness.LivenessEngine;
+import com.arcsoft.liveness.LivenessInfo;
 import com.runvision.core.Const;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 /**
  * Created by Administrator on 2018/8/3.
@@ -22,8 +29,26 @@ public class FaceLibCore {
     private boolean initLib = false;
     private byte[] a = new byte[1];
     private byte[] b = new byte[1];
+
+    /**
+     * 人脸检测
+     */
     private AFD_FSDKEngine engine_AFD = null;
+
+    /**
+     * 人脸识别
+     */
     private AFR_FSDKEngine engine_AFR = null;
+
+    /**
+     * 人脸追踪
+     */
+    private AFT_FSDKEngine engine_AFT = null;
+
+    /**
+     * 活体检测
+     */
+    private LivenessEngine engine_Live = null;
 
     public int initLib() {
         //初始化FD的引擎
@@ -34,14 +59,39 @@ public class FaceLibCore {
             engine_AFD = null;
             return error.getCode();
         }
-        //FR的引擎
+
+        //初始化FR的引擎
         engine_AFR = new AFR_FSDKEngine();
         AFR_FSDKError err = engine_AFR.AFR_FSDK_InitialEngine(Const.APP_ID, Const.APP_KEY_FR);
         if (err.getCode() != AFR_FSDKError.MOK) {
-            Log.e(TAG, "初始化init_AFR失败,错误码" + error.getCode());
+            Log.e(TAG, "初始化init_AFR失败,错误码:" + error.getCode());
             engine_AFD = null;
             return err.getCode();
         }
+
+        //初始化FT的引擎
+        engine_AFT = new AFT_FSDKEngine();
+        AFT_FSDKError aft_fsdkError = engine_AFT.AFT_FSDK_InitialFaceEngine(Const.FREESDKAPPID, Const.FTSDKKEY, AFT_FSDKEngine.AFT_OPF_0_HIGHER_EXT, 16, 5);
+        if(aft_fsdkError.getCode() != AFT_FSDKError.MOK) {
+            Log.e(TAG, "初始化init_AFT失败,错误码：" + aft_fsdkError.getCode());
+            return aft_fsdkError.getCode();
+        }
+
+        //活体引擎激活
+        engine_Live = new LivenessEngine();
+        ErrorInfo activeCode = engine_Live.activeEngine(Const.LIVENESSAPPID, Const.LIVENESSSDKKEY);
+        if (activeCode.getCode() == ErrorInfo.MOK || activeCode.getCode() == ErrorInfo.MERR_AL_BASE_ALREADY_ACTIVATED) {
+            //初始化Live的引擎
+            ErrorInfo errorInfo = engine_Live.initEngine(LivenessEngine.AL_DETECT_MODE_VIDEO);
+            if(errorInfo.getCode() != ErrorInfo.MOK) {
+                Log.e(TAG, "活体初始化失败,错误码：" + errorInfo.getCode());
+                return (int) errorInfo.getCode();
+            }
+        } else {
+            Log.e(TAG, "活体引擎激活失败,错误码：" + activeCode.getCode());
+            return (int) activeCode.getCode();
+        }
+
         return 0;
     }
 
@@ -65,6 +115,46 @@ public class FaceLibCore {
             ret = err.getCode();
         }
         return ret;
+    }
+
+    /**
+     * 活体检测
+     * @param data  相机流
+     * @param mWidth
+     * @param mHeight
+     * @param faceInfos
+     * @return
+     */
+    public boolean detect(final byte[] data, int mWidth, int mHeight, List<com.arcsoft.liveness.FaceInfo> faceInfos) {
+        //活体检测(目前只支持单人脸，且无论有无人脸都需调用)
+        List<LivenessInfo> livenessInfos = new ArrayList<>();
+        synchronized (b) {
+            ErrorInfo livenessError = engine_Live.startLivenessDetect(data, mWidth, mHeight,
+                    LivenessEngine.CP_PAF_NV21, faceInfos, livenessInfos);
+            Log.i("lichao", "startLiveness: errorcode " + livenessError.getCode());
+            if (livenessError.getCode() == ErrorInfo.MOK) {
+                if (livenessInfos.size() == 0) {
+                    Log.e("lichao", "无人脸");
+                    return false;
+                }
+                final int liveness = livenessInfos.get(0).getLiveness();
+                //Log.i("lichao", "getLivenessScore: liveness " + liveness);
+                if (liveness == LivenessInfo.NOT_LIVE) {
+                    Log.e("lichao", "非活体");
+                    return false;
+                } else if (liveness == LivenessInfo.LIVE) {
+                    Log.e("lichao", "活体");
+                    return true;
+                } else if (liveness == LivenessInfo.MORE_THAN_ONE_FACE) {
+                    Log.e("lichao", "非单人脸信息");
+                    return false;
+                } else {
+                    Log.e("lichao", "未知");
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -112,9 +202,9 @@ public class FaceLibCore {
     }
 
     /**
-     * 销毁人脸引擎
+     * 销毁所有引擎
      */
-    public void AFR_FSDK_UninitialEngine() {
+    public void UninitialAllEngine() {
         synchronized (a) {
             if (engine_AFD != null) {
                 engine_AFD.AFD_FSDK_UninitialFaceEngine();
@@ -124,7 +214,14 @@ public class FaceLibCore {
                 engine_AFR.AFR_FSDK_UninitialEngine();
                 engine_AFR = null;
             }
-
+            if (engine_AFT != null) {
+                engine_AFT.AFT_FSDK_UninitialFaceEngine();
+                engine_AFT = null;
+            }
+            if (engine_Live != null) {
+                engine_Live.unInitEngine();
+                engine_Live = null;
+            }
         }
     }
 

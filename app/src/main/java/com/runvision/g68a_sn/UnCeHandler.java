@@ -1,4 +1,4 @@
-package com.runvision.g69a_sn;
+package com.runvision.g68a_sn;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;

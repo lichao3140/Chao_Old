@@ -30,13 +30,11 @@ public class Const {
 
     public static int COMPER_NUM = 10;
 
-   // public static float comper_socre = 0.65f;//1：N阈值
+    // public static float comper_socre = 0.65f;//1：N阈值
+    public static float ONEVSMORE_SCORE = 0.70f;//1：N阈值
 
-    public static float ONEVSMORE_SCORE=0.70f;//1：N阈值
-
-   // public static float comper_socre_1 = 0.45f;//1：1阈值
+    // public static float comper_socre_1 = 0.45f;//1：1阈值
     public static float ONEVSONE_SCORE = 0.45f;//1：1阈值
-
 
     /**
      * 是否注册人脸标志位
@@ -52,10 +50,21 @@ public class Const {
      * 相机流的高
      */
     public static final int PRE_HEIGTH = 480;
+
     /**
      * 相机流的宽
      */
     public static final int PRE_WIDTH = 640;
+
+    /**
+     * G68A设备屏幕高
+     */
+    public static final int G68A_HEIGHT = 976;
+
+    /**
+     * G68A设备屏幕宽
+     */
+    public static final int G68A_WIDTH = 600;
 
     public static final String APP_ID = "J3Yscp63XC1M1ut6Fk6DguT9pEGgKYkXZVcfUQmsFDZC";
     public static final String APP_KEY_FD = "4wY3J6N2MQvjY1wAtg51niqvMheQ57mU2VdZ9e6gP2kB";
@@ -71,16 +80,14 @@ public class Const {
     //记录人脸定位算法是否成功
     public static boolean afdInit = false;
 
-    public static final int PROMPT=1000;
-    public static final int COMPER_END=1001;
-    public static final int TEST_INFRA_RED=1002;
-    public static final int FLAG_SHOW_LOG=1003;
-    public static final int READ_CARD=1004;
-    public static final int UPDATE_UI=1005;
-    public static final int COMPER_FINIASH=1006;
-    public static final int MSG_FACE=1007;
-
-
+    public static final int PROMPT = 1000;
+    public static final int COMPER_END = 1001;
+    public static final int TEST_INFRA_RED = 1002;
+    public static final int FLAG_SHOW_LOG = 1003;
+    public static final int READ_CARD = 1004;
+    public static final int UPDATE_UI = 1005;
+    public static final int COMPER_FINIASH = 1006;
+    public static final int MSG_FACE = 1007;
 
     //socket连接超时
     public static final int SOCKET_TIMEOUT = 10;
@@ -89,7 +96,7 @@ public class Const {
     //socket接收模版完成
     public static final int SOCKRT_SENDIMAGE = 12;
 
-   // public static final int WEB_UPDATE = 13;
+    // public static final int WEB_UPDATE = 13;
 
     //socket协议发送消息类型
     //通信协议版本号
@@ -109,7 +116,6 @@ public class Const {
     public final static char TYPE_ONEVSMORE = 0x02;
 
     public static final int SOCKET_LOGIN = 9;
-
 
     /**
      * 抓拍图片保存未知
@@ -137,13 +143,11 @@ public class Const {
     public static final String KEY_VMSPASSWORD = "vmsPassWord";
 
     public static final String ATD_UP_STARTIME = "atd_up_startime";
-    public static final String ATD_UP_ENDTIME  = "atd_up_endtime";
+    public static final String ATD_UP_ENDTIME = "atd_up_endtime";
     public static final String ATD_DOWN_STARTIME = "atd_down_startime";
     public static final String ATD_DOWN_ENDTIME = "atd_down_endtime";
 
-
-    public static final String KEY_PRESERVATION_DAY= "preservation_day";
-
+    public static final String KEY_PRESERVATION_DAY = "preservation_day";
 
     /**
      * 默认开启活体
@@ -160,24 +164,30 @@ public class Const {
      */
     public static final int CLOSE_HOME_TIMEOUT = 30;
 
-
     public static final int CLOSE_DOOR_TIME = 1;
 
-    public static Boolean BATCH_IMPORT_TEMPLATE=false;
-    public static Boolean VMS_BATCH_IMPORT_TEMPLATE=false;
-    public static Boolean VMS_TEMPLATE=false;
+    public static Boolean BATCH_IMPORT_TEMPLATE = false;
+    public static Boolean VMS_BATCH_IMPORT_TEMPLATE = false;
+    public static Boolean VMS_TEMPLATE = false;
 
-    public static int BATCH_FLAG=0;
+    public static int BATCH_FLAG = 0;
 
-    public static boolean UPDATE_IP=false;
+    public static boolean UPDATE_IP = false;
 
     //public static Boolean BATCH_IMPORT_TEMPLATE=false;
 
- public static String Templatepath = Environment.getExternalStorageDirectory() + "/FaceAndroid/Template/";
- public static String ImagePath = Environment.getExternalStorageDirectory() + "/FaceAndroid/FaceTemplate/";
+    /**
+     * 存储人脸图片转Data数据模板路径
+     */
+    public static String Templatepath = Environment.getExternalStorageDirectory() + "/FaceAndroid/Template/";
 
- public static boolean WEB_UPDATE=false;
- public static boolean DELETETEMPLATE=false;
+    /**
+     * 存储人脸图片模板路径
+     */
+    public static String ImagePath = Environment.getExternalStorageDirectory() + "/FaceAndroid/FaceTemplate/";
+
+    public static boolean WEB_UPDATE = false;
+    public static boolean DELETETEMPLATE = false;
 
 
 }

@@ -10,10 +10,11 @@ import android.util.Log;
 import com.arcsoft.facedetection.AFD_FSDKFace;
 import com.runvision.bean.AppData;
 import com.runvision.bean.FaceInfo;
+import com.runvision.bean.FaceLibCore;
 import com.runvision.bean.ImageStack;
 import com.runvision.core.Const;
-import com.runvision.g69a_sn.MainActivity;
-import com.runvision.g69a_sn.MyApplication;
+import com.runvision.g68a_sn.MainActivity;
+import com.runvision.g68a_sn.MyApplication;
 import com.runvision.myview.MyCameraSuf;
 import com.runvision.utils.CameraHelp;
 
@@ -34,7 +35,6 @@ public class FaceFramTask extends AsyncTask<Void, Rect, Void> {
     private MyCameraSuf mCameraView;
     List<AFD_FSDKFace> result = new ArrayList<AFD_FSDKFace>();
     byte[] des;
-    byte[] livedata;
     private boolean flag=false;
     public static boolean faceflag=false;
 
@@ -61,23 +61,25 @@ public class FaceFramTask extends AsyncTask<Void, Rect, Void> {
     @Override
     protected Void doInBackground(Void... params) {
         while (isRuning) {
-            des= CameraHelp.rotateCamera(imageStack.pullImageInfo().getData(), 640, 480, 270);
-            livedata = MyCameraSuf.getmCameraData();
+            des= CameraHelp.rotateCamera(imageStack.pullImageInfo().getData(), 640, 480, 90);
             MyApplication.mFaceLibCore.FaceDetection(des, 480, 640, result);
             if (result.size() != 0) {
-               // Log.i(TAG, result.get(0).getRect().left + "," + result.get(0).getRect().top);
+                //Log.i("lichao", result.get(0).getRect().left + "," + result.get(0).getRect().top);
                 publishProgress(result.get(0).getRect());
                 faceflag=true;
-                if(!flag && MainActivity.detect(livedata, 640, 480)) {
+                List<com.arcsoft.liveness.FaceInfo> faceInfos = new ArrayList<>();
+                com.arcsoft.liveness.FaceInfo faceInfo = new com.arcsoft.liveness.FaceInfo(result.get(0).getRect(), result.get(0).getDegree());
+                faceInfos.add(faceInfo);
+                // detect活体验证
+                if(!flag && MyApplication.mFaceLibCore.detect(des, 480, 640, faceInfos)) {
                     FaceInfo info = new FaceInfo(des, result.get(0));
                     Message msg = new Message();
                     msg.obj = info;
                     msg.what = Const.MSG_FACE;
                     handler.sendMessage(msg);
                 }
-
             } else {
-                //Log.i(TAG, "无人脸");
+                Log.i("lichao", "无人脸");
                 faceflag=false;
                 publishProgress(new Rect(0, 0, 0, 0));
             }
@@ -94,7 +96,7 @@ public class FaceFramTask extends AsyncTask<Void, Rect, Void> {
           //  if (degree==1 || degree==12 || degree==6) {
             Log.i("Gavin","degree::"+degree);
                // if(degree==1)
-              //  {
+              // {
                 Bitmap map = CameraHelp.getBitMap(des);
                 AppData.getAppData().setFaceBmp(CameraHelp.getFaceImgByInfraredJpg(values[0].left, values[0].top, values[0].right, values[0].bottom, map));
                // AppData.getAppData().setFaceBmp(map);

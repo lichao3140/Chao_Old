@@ -18,7 +18,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.runvision.core.Const;
-import com.runvision.g69a_sn.R;
+import com.runvision.g68a_sn.R;
 import com.runvision.utils.CameraHelp;
 import com.runvision.utils.SPUtil;
 

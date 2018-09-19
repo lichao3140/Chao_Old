@@ -1,4 +1,4 @@
-package com.runvision.g69a_sn;
+package com.runvision.g68a_sn;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

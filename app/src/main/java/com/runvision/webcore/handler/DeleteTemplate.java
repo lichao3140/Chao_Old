@@ -2,7 +2,7 @@ package com.runvision.webcore.handler;
 
 import com.runvision.core.Const;
 import com.runvision.db.User;
-import com.runvision.g69a_sn.MyApplication;
+import com.runvision.g68a_sn.MyApplication;
 import com.runvision.utils.FileUtils;
 import com.yanzhenjie.andserver.RequestHandler;
 import com.yanzhenjie.andserver.RequestMethod;

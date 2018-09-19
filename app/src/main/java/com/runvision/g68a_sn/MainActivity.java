@@ -1,4 +1,4 @@
-package com.runvision.g69a_sn;
+package com.runvision.g68a_sn;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -9,10 +9,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.Rect;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.media.MediaPlayer;
@@ -31,16 +27,9 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.arcsoft.facedetection.AFD_FSDKEngine;
 import com.arcsoft.facedetection.AFD_FSDKFace;
 import com.arcsoft.facerecognition.AFR_FSDKFace;
 import com.arcsoft.facerecognition.AFR_FSDKMatching;
-import com.arcsoft.facetracking.AFT_FSDKEngine;
-import com.arcsoft.facetracking.AFT_FSDKError;
-import com.arcsoft.facetracking.AFT_FSDKFace;
-import com.arcsoft.liveness.ErrorInfo;
-import com.arcsoft.liveness.LivenessEngine;
-import com.arcsoft.liveness.LivenessInfo;
 import com.runvision.bean.AppData;
 import com.runvision.bean.FaceInfo;
 import com.runvision.bean.ImageStack;
@@ -60,7 +49,6 @@ import com.runvision.utils.ConversionHelp;
 import com.runvision.utils.DateTimeUtils;
 import com.runvision.utils.FileUtils;
 import com.runvision.utils.IDUtils;
-import com.runvision.utils.ImageUtils;
 import com.runvision.utils.LogToFile;
 import com.runvision.utils.SPUtil;
 import com.runvision.utils.SendData;
@@ -88,7 +76,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
 import android_serialport_api.SerialPort;
 
 public class MainActivity extends Activity implements NetWorkStateReceiver.INetStatusListener, View.OnClickListener {
@@ -164,11 +151,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
     private Boolean SysTimeflag = true;
 
     List<User> mList;
-
-    // 活体检测
-    private static LivenessEngine livenessEngine;
-    private static AFD_FSDKEngine fdEngine;
-    private static AFT_FSDKEngine ftEngine;
 
     // private boolean vms_Import_template=false;
     /**
@@ -550,10 +532,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        fdEngine = new AFD_FSDKEngine();
-        ftEngine = new AFT_FSDKEngine();
-        livenessEngine = new LivenessEngine();
-
         hideBottomUIMenu();
         initView();
         mContext = this;
@@ -564,56 +542,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
 
         openNetStatusReceiver();
         openSocket();
-        InitEngine();
-    }
-
-    /**
-     * 激活活体检测引擎和引擎初始化
-     */
-    private void InitEngine() {
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                final long activeCode = livenessEngine.activeEngine(Const.LIVENESSAPPID,
-                        Const.LIVENESSSDKKEY).getCode();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (activeCode == ErrorInfo.MERR_AL_BASE_ALREADY_ACTIVATED || activeCode == ErrorInfo.MOK) {
-                            //showToast("活体引擎激活成功");
-                            //FT引擎初始化
-                            int ftInitErrorCode = ftEngine.AFT_FSDK_InitialFaceEngine(Const.FREESDKAPPID,
-                                    Const.FTSDKKEY, AFT_FSDKEngine.AFT_OPF_0_HIGHER_EXT,
-                                    16, 5).getCode();
-                            if (ftInitErrorCode != 0) {
-                                showToast("FT初始化失败，errorcode：" + ftInitErrorCode);
-                                Log.e("lichao", "FT初始化失败，errorcode：" + ftInitErrorCode);
-                                return;
-                            }
-                            //活体引擎初始化(视频)
-                            ErrorInfo error = livenessEngine.initEngine(LivenessEngine.AL_DETECT_MODE_VIDEO);
-                            if (error.getCode() != 0) {
-                                showToast("活体初始化失败，errorcode：" + error.getCode());
-                                Log.e("lichao", "活体初始化失败");
-                                return;
-                            }
-                        } else {
-                            showToast("活体引擎激活失败，errorcode：" + activeCode);
-                            Log.e("lichao", "活体引擎激活失败");
-                        }
-                    }
-                });
-            }
-        });
-    }
-
-    public void unInitEngine() {
-        //FD引擎销毁
-        fdEngine.AFD_FSDK_UninitialFaceEngine();
-        //FT引擎销毁
-        ftEngine.AFT_FSDK_UninitialFaceEngine();
-        //活体引擎销毁
-        livenessEngine.unInitEngine();
     }
 
     @Override
@@ -680,11 +608,11 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         //MyApplication.mFaceLibCore.AFR_FSDK_UninitialEngine();
     }
 
-    @Override
-    protected void onDestroy() {
-        unInitEngine();
-        super.onDestroy();
-    }
+//    @Override
+//    protected void onDestroy() {
+//        MyApplication.mFaceLibCore.UninitialAllEngine();
+//        super.onDestroy();
+//    }
 
     /**
      * 初始化视图控件
@@ -846,52 +774,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         //  Log.i("Gavin","oneCompareScore:"+AppData.getAppData().getoneCompareScore());
     }
 
-    public static boolean detect(final byte[] data, int mWidth, int mHeight) {
-        List<AFT_FSDKFace> ftFaceList = new ArrayList<>();
-        //视频FT检测人脸
-        int ftCode = ftEngine.AFT_FSDK_FaceFeatureDetect(data, mWidth, mHeight,
-                AFT_FSDKEngine.CP_PAF_NV21, ftFaceList).getCode();
-        if (ftCode != AFT_FSDKError.MOK) {
-            Log.i(TAG, "AFT_FSDK_FaceFeatureDetect: errorcode " + ftCode);
-            return false;
-        }
-        int maxIndex = ImageUtils.findFTMaxAreaFace(ftFaceList);
-        final List<com.arcsoft.liveness.FaceInfo> faceInfos = new ArrayList<>();
-        if (maxIndex != -1) {
-            AFT_FSDKFace face = ftFaceList.get(maxIndex);
-            com.arcsoft.liveness.FaceInfo faceInfo = new com.arcsoft.liveness.FaceInfo(face.getRect(), face.getDegree());
-            faceInfos.add(faceInfo);
-        }
-        //活体检测(目前只支持单人脸，且无论有无人脸都需调用)
-        List<LivenessInfo> livenessInfos = new ArrayList<>();
-        ErrorInfo livenessError = livenessEngine.startLivenessDetect(data, mWidth, mHeight,
-                LivenessEngine.CP_PAF_NV21, faceInfos, livenessInfos);
-        Log.i("lichao", "startLiveness: errorcode " + livenessError.getCode());
-        if (livenessError.getCode() == ErrorInfo.MOK) {
-            if (livenessInfos.size() == 0) {
-                Log.e("lichao", "无人脸");
-                return false;
-            }
-            final int liveness = livenessInfos.get(0).getLiveness();
-            //Log.i("lichao", "getLivenessScore: liveness " + liveness);
-            if (liveness == LivenessInfo.NOT_LIVE) {
-                Log.e("lichao", "非活体");
-                return false;
-            } else if (liveness == LivenessInfo.LIVE) {
-                Log.e("lichao", "活体");
-                return true;
-            } else if (liveness == LivenessInfo.MORE_THAN_ONE_FACE) {
-                Log.e("lichao", "非单人脸信息");
-                return false;
-            } else {
-                Log.e("lichao", "未知");
-                return false;
-            }
-        }
-        return false;
-    }
-
-
     private BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -989,8 +871,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
             showToast("连接读卡器失败:" + e.getMessage());
         }
     }
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
     /**
      * 隐藏虚拟按键，并且全屏
@@ -1032,8 +912,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
             }, 1500);
         }
     }
-
-    ;
 
     /**
      * 1vsn显示对比后成功是否窗口
@@ -1103,11 +981,9 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                 } else {
                     AppData.getAppData().clean();
                 }
-
             } else if (AppData.getAppData().getCompareScore() != 0) {
                 Const.ONE_VS_MORE_TIMEOUT_NUM++;
             }
-
         }
     }
 
@@ -1247,10 +1123,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                 alert.setVisibility(View.GONE);
                 // isOpenOneVsMore = true;
             }
-
         }, 2000);
-
-
     }
 
 
@@ -1389,7 +1262,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
 
     }
 
-
     /**
      * 红外线程
      */
@@ -1402,8 +1274,9 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
             super.run();
             while (true) {
                 //Log.i("Gavin","redflag:" +redflag);
-                // 3288板
+                // G68A设备去除红外
                 int status = GPIOHelper.readStatus();
+                status = 1;
                 if (redflag == true) {
                     try {
                         Thread.sleep(1500);
@@ -1444,16 +1317,12 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
 
     }
 
-    ;
-
-
     /**
      * 更新UI标志线程
      */
     private class UIThread extends Thread {
         @Override
         public void run() {
-            // TODO Auto-generated method stub
             super.run();
             while (true) {
                 try {
@@ -1497,7 +1366,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
     public void httpStop() {
         showHttpUrl.setText("The HTTP Server is stopped");
     }
-
 
     /**
      * 注册网络监听广播
@@ -1556,7 +1424,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         }
     }
 
-
     /**
      * socket重连接
      *
@@ -1596,9 +1463,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
 
     }
 
-    /**
-     * -----------------------------------------------------------------------------------------------
-     */
     //上传的所有数据长度大小
     private int mSum = 0;
     //切割后的数据
@@ -1645,7 +1509,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
             return;
         }
 
-        //   vms_Import_template=true;
+        //vms_Import_template=true;
 
         Const.VMS_BATCH_IMPORT_TEMPLATE = true;
         // Const.BATCH_FLAG=1;
@@ -1672,7 +1536,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
             thread3.start();
         }
     }
-
 
     /**
      * 检查扩展名，得到图片格式的文件
@@ -1715,8 +1578,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
             dataList1 = list;
         }
     }
-
-    //________Http部分
 
     /**
      * 打开HTTP服务器
