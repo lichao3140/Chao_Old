@@ -27,13 +27,13 @@
             android:layout_weight="1"
             android:background="#747272"
             android:gravity="center"
-            android:text="人脸抓拍注册"
-            android:textColor="#000"/>
+            android:text="@string/register_face_snap"
+            android:textColor="@color/black"/>
 
         <View
             android:layout_width="1dp"
             android:layout_height="match_parent"
-            android:background="#000" />
+            android:background="@color/black" />
 
         <TextView
             android:id="@+id/showUserFrameLayout"
@@ -41,8 +41,8 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="设备设置"
-            android:textColor="#000"/>
+            android:text="@string/register_device_setting"
+            android:textColor="@color/black"/>
 
     </LinearLayout>
 
