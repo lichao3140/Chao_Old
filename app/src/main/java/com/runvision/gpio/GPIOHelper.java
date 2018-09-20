@@ -14,4 +14,5 @@ public class GPIOHelper {
     public static native int readStatus();
 
     public static native void init();
+
 }

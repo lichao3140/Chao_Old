@@ -96,7 +96,8 @@ public class CoreService extends Service {
     private Server.ServerListener mListener = new Server.ServerListener() {
         @Override
         public void onStarted() {
-            String hostAddress = mServer.getInetAddress().getHostAddress();
+//            String hostAddress = mServer.getInetAddress().getHostAddress();
+            String hostAddress = getHostIP();
             ServerManager.serverStart(CoreService.this, hostAddress);
         }
 

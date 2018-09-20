@@ -39,6 +39,7 @@ import com.runvision.db.Record;
 import com.runvision.db.User;
 import com.runvision.frament.DeviceSetFrament;
 import com.runvision.gpio.GPIOHelper;
+import com.runvision.gpio.SlecProtocol;
 import com.runvision.myview.MyCameraSuf;
 import com.runvision.thread.BatchImport;
 import com.runvision.thread.FaceFramTask;
@@ -54,6 +55,7 @@ import com.runvision.utils.SPUtil;
 import com.runvision.utils.SendData;
 import com.runvision.utils.TestDate;
 import com.runvision.webcore.ServerManager;
+import com.wits.serialport.SerialPortManager;
 import com.zkteco.android.IDReader.IDPhotoHelper;
 import com.zkteco.android.IDReader.WLTService;
 import com.zkteco.android.biometric.core.device.ParameterHelper;
@@ -66,8 +68,11 @@ import com.zkteco.android.biometric.module.idcard.meta.IDCardInfo;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.security.InvalidParameterException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -84,10 +89,11 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
     private Context mContext;
     //private ComperThread mComperThread;//1:n比对线程
     private MyRedThread mMyRedThread;//红外线程
-    private UIThread uithread;
+    private UIThread uithread;//UI线程
+    private SLecDeviceThread sLecDeviceThread;
 
     //////////////////////////////////////////////////视图控件
-    public static MyCameraSuf mCameraSurfView;
+    public MyCameraSuf mCameraSurfView;
     private RelativeLayout home_layout;
 
     private View promptshow_xml;//提示框
@@ -111,7 +117,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
 
     private boolean TipsFlag = false;
 
-    private static FaceFramTask faceDetectTask = null;
+    private FaceFramTask faceDetectTask = null;
 
     private boolean bStop = false;
 
@@ -128,11 +134,9 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
     private static final int VID = 1024; // IDR VID
     private static final int PID = 50010; // IDR PID
     private IDCardReader idCardReader = null;
-
     private boolean ReaderCardFlag = true;
-    // -----------------------------------------end------------------------------------------------
 
-    // ------------------------------这个按钮是设置或以开关的---------------------------------------
+    // ------------------------------这个按钮是设置或以开关的----------------------------------
     //这个按钮是设置或以开关的
     private NetWorkStateReceiver receiver;
     private TextView socket_status;
@@ -534,6 +538,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
 
         hideBottomUIMenu();
         initView();
+        initRelay();
         mContext = this;
 
         application = (MyApplication) getApplication();
@@ -574,11 +579,11 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
     protected void onPause() {
         super.onPause();
         //关闭相机线程
-        // Log.i("Gavin","onPause");
         Infra_red = false;
         mCameraSurfView.releaseCamera();
         //关闭红外
         mMyRedThread.closeredThread();
+        sLecDeviceThread.interrupt();
         if (mMyRedThread != null) {
             mMyRedThread.interrupt();
             mMyRedThread = null;
@@ -605,14 +610,14 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         }
         IDCardReaderFactory.destroy(idCardReader);
         unregisterReceiver(mUsbReceiver);
-        //MyApplication.mFaceLibCore.AFR_FSDK_UninitialEngine();
     }
 
-//    @Override
-//    protected void onDestroy() {
-//        MyApplication.mFaceLibCore.UninitialAllEngine();
-//        super.onDestroy();
-//    }
+    @Override
+    protected void onDestroy() {
+        MyApplication.mFaceLibCore.UninitialAllEngine();
+        mSerialPortManager.closeSerialPort4();
+        super.onDestroy();
+    }
 
     /**
      * 初始化视图控件
@@ -663,6 +668,12 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                 startActivity(new Intent(MainActivity.this, RegisterActivity.class));
             }
         });
+    }
+
+    private void initRelay() {
+        mSerialPortManager = new SerialPortManager();
+        sLecDeviceThread = new SLecDeviceThread();
+        sLecDeviceThread.start();
     }
 
     /**
@@ -807,7 +818,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
     };
 
     /**
-     * 读卡器 初始化
+     * 读卡器初始化
      */
     private void startIDCardReader() {
         LogHelper.setLevel(Log.ASSERT);
@@ -950,6 +961,8 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                     return;
                 }
                 GPIOHelper.openDoor(true);
+                openRelay();
+
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -1274,7 +1287,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
             super.run();
             while (true) {
                 //Log.i("Gavin","redflag:" +redflag);
-                // G68A设备去除红外
+                // G68A设备红外接口不一样
                 int status = GPIOHelper.readStatus();
                 status = 1;
                 if (redflag == true) {
@@ -1691,5 +1704,137 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         }
         return range;
     }
+
+    private SerialPortManager mSerialPortManager;
+    private InputStream mInputStream4;
+    private OutputStream mOutputStream4;
+    private com.wits.serialport.SerialPort serialPort4;
+    private String icCard = "";
+
+    public void openRelay() {
+        if (mOutputStream4 == null) {
+            showToast("请先打开串口");
+            return;
+        }
+        try {
+            byte[] bytes1 = SlecProtocol.hexStringToBytes(new String[]{
+                            "55555555",  //用户id,8个字符，缺少的前面补0
+                            "12345678",//用户卡号,8个字符，缺少的的前面补0
+                            "0001"}//开门间隔,4个字符，缺少的的前面补0
+                    , true);
+            byte[] bytes = SlecProtocol.commandAndDataToAscii(
+                    ((byte) 0x01),
+                    bytes1
+            );
+            mOutputStream4.write(bytes);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private class SLecDeviceThread extends Thread {
+        @Override
+        public void run() {
+            super.run();
+            try {
+                //串口4，继电器控制
+                serialPort4 = mSerialPortManager.getSerialPort4();
+                mInputStream4 = serialPort4.getInputStream();
+                mOutputStream4 = serialPort4.getOutputStream();
+                sleep(500);
+                while (true) {
+                    try {
+                        sleep(50);
+                        byte[] buffer = new byte[64];
+                        if (mInputStream4 == null) {
+                            continue;
+                        }
+                        int size = mInputStream4.read(buffer);
+
+                        if (size < 1) {
+                            continue;
+                        }
+
+                        int len = icCard.length();
+                        Log.e("gzy", "run: " + size + "--" + icCard);
+                        if (len == 0) {
+                            //第一条数据
+                            icCard = SlecProtocol.bytesToHexString2(buffer, size);
+                        } else {
+                            //之前已经有数据
+                            icCard = icCard + SlecProtocol.bytesToHexString2(buffer, size);
+                        }
+                        mHandler.removeCallbacks(cancelCardRunnable);
+                        //200ms没有新的数据就发送
+                        mHandler.postDelayed(cancelCardRunnable, 200);
+
+                    } catch (SecurityException e) {
+                        Log.e("SerialPort", "-----------------SecurityException");
+                    } catch (IOException e) {
+                        Log.e("SerialPort", "-----------------IOException" + e.toString());
+                    } catch (InvalidParameterException e) {
+                        Log.e("SerialPort", "-----------------InvalidParameterException");
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 退出读卡状态
+     */
+    private Runnable cancelCardRunnable = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                //处理icCard
+                Log.e("gzy", "接收到的串口数据为: " + icCard);
+
+                final byte[] bytes = SlecProtocol.asciiToHex(SlecProtocol.hexToByteArray(icCard));
+                if (bytes.length > 5) {
+                    Log.e("gzy", "接收转换: " + SlecProtocol.bytesToHexString2(bytes, bytes.length) +
+                            "--命令：" + bytes[3] +
+                            "--数据长度：" + bytes[5] +
+                            "--数据：" + (bytes[5] == 0 ? "没有数据" : bytes[6])
+                    );
+                    switch (bytes[3]) {
+                        case 1:
+                            if (bytes[6] == 0) {
+                                Log.e("gzy", "run: 发送开门指令成功");
+                            } else {
+                                Log.e("gzy", "run: 发送开门指令失败");
+                            }
+                            break;
+                        case 2:
+                            //刷卡
+                            //6-9是用户id，10-13是卡号
+                            if (bytes.length > 13) {
+                                final byte[] card = new byte[4];
+                                for (int i = 0; i < card.length; i++) {
+                                    card[i] = bytes[10 + i];
+                                }
+                            }
+                            break;
+                        default:
+                    }
+                }
+                //重置
+                icCard = "";
+            } catch (Exception e2) {
+                e2.printStackTrace();
+                //重置
+                icCard = "";
+            }
+            //重置
+            icCard = "";
+        }
+    };
 
 }
