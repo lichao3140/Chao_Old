@@ -10,59 +10,60 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="100px">
+        android:layout_height="@dimen/y47">
 
         <Button
-            android:layout_marginLeft="10px"
             android:background="#ccc"
             android:id="@+id/btn_openPhone"
             android:layout_width="0px"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:layout_marginRight="10px"
+            android:layout_marginEnd="@dimen/x5"
+            android:layout_marginStart="@dimen/x5"
             android:textSize="50sp"
-            android:text="开始抓拍" />
+            android:text="@string/register_start_snap" />
 
     </LinearLayout>
 
     <LinearLayout
-
         android:id="@+id/reg_chooseOneImage"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="30px"
-        android:gravity="center_horizontal"
+        android:layout_marginTop="@dimen/y14"
+        android:layout_gravity="center_horizontal"
         android:orientation="vertical">
 
         <FrameLayout
             android:id="@+id/fra"
-            android:layout_width="640px"
-            android:layout_height="480px"
-            android:layout_marginLeft="70dp">
+            android:layout_width="@dimen/y300"
+            android:layout_height="@dimen/x256"
+            android:layout_marginStart="@dimen/x37">
 
             <com.runvision.myview.MyCameraSuf
                 android:id="@+id/reg_myCameraSuf"
-                android:layout_width="640px"
-                android:layout_height="480px"
-                />
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
         </FrameLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_marginTop="@dimen/y14"
+            android:layout_marginStart="@dimen/x5"
+            android:layout_marginEnd="@dimen/x5"
             android:layout_weight="1">
 
+            <!-- 显示抓拍的图片 -->
             <LinearLayout
-                android:layout_width="200px"
-                android:layout_height="match_parent"
-                android:gravity="center">
+                android:layout_width="@dimen/x96"
+                android:layout_height="@dimen/y122"
+                android:layout_gravity="center_horizontal">
 
                 <ImageView
-
                     android:id="@+id/choose_bitmap"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@mipmap/snap"/>
             </LinearLayout>
 
             <LinearLayout
@@ -70,147 +71,148 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:layout_marginLeft="20dp"
-                android:layout_marginTop="40dp">
+                android:layout_marginTop="@dimen/y19"
+                tools:ignore="NestedWeights">
 
                 <LinearLayout
-                    android:layout_width="527px"
-                    android:layout_height="70px"
-                    android:gravity="center_vertical|left">
+                    android:layout_width="@dimen/x281"
+                    android:layout_height="@dimen/y33"
+                    android:gravity="center_vertical|left"
+                    tools:ignore="RtlHardcoded">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="姓 名:"
-                        android:textColor="#747272"/>
+                        android:text="@string/register_name"
+                        android:textSize="@dimen/x11"
+                        android:textColor="@color/dimgray"/>
 
                     <EditText
                         android:id="@+id/reg_name"
-                        android:layout_width="200px"
+                        android:layout_width="@dimen/x107"
                         android:layout_height="wrap_content"
-                        android:textColor="#000000"
+                        android:textColor="@color/black"
                         android:theme="@style/MyEditText"/>
-
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="年 龄:"
-                        android:textColor="#747272"
+                        android:text="@string/register_age"
+                        android:textSize="@dimen/x11"
+                        android:textColor="@color/dimgray"
                         android:layout_marginLeft="10dp"/>
 
                     <EditText
                         android:id="@+id/reg_age"
-                        android:layout_width="200px"
+                        android:layout_width="@dimen/x80"
                         android:layout_height="wrap_content"
-                        android:textColor="#000000"
+                        android:textColor="@color/black"
                         android:theme="@style/MyEditText"/>
 
                 </LinearLayout>
 
-
                 <LinearLayout
-                    android:layout_width="527px"
-                    android:layout_height="70px"
-                    android:gravity="center_vertical|left">
+                    android:layout_width="@dimen/x281"
+                    android:layout_height="@dimen/y33"
+                    android:gravity="center_vertical|left"
+                    tools:ignore="RtlHardcoded">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="工号:"
-                        android:textColor="#747272"/>
-
-                    <EditText
-                        android:digits="@string/filter_vcode"
-                        android:id="@+id/reg_phone"
-                        android:layout_width="200px"
-                        android:layout_height="wrap_content"
-                        android:textColor="#000000"
-                        android:theme="@style/MyEditText"/>
-
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="证件号:"
-                        android:textColor="#747272"
-                        android:layout_marginLeft="10dp"/>
+                        android:text="@string/register_id"
+                        android:textSize="@dimen/x11"
+                        android:textColor="@color/dimgray"/>
 
                     <EditText
                         android:digits="@string/filter_vcode"
                         android:id="@+id/reg_idnum"
-                        android:layout_width="200px"
+                        android:layout_width="@dimen/x107"
                         android:layout_height="wrap_content"
-                        android:textColor="#000000"
+                        android:textColor="@color/black"
                         android:theme="@style/MyEditText"/>
-
-                </LinearLayout>
-
-
-                <LinearLayout
-                    android:layout_width="527px"
-                    android:layout_height="70px"
-                    android:gravity="center_vertical|left">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="类型:"
-                        android:textColor="#747272"/>
+                        android:text="@string/register_number"
+                        android:textSize="@dimen/x11"
+                        android:textColor="@color/dimgray"
+                        android:layout_marginLeft="10dp"/>
 
+                    <EditText
+                        android:digits="@string/filter_vcode"
+                        android:id="@+id/reg_phone"
+                        android:layout_width="@dimen/x80"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/black"
+                        android:theme="@style/MyEditText"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="@dimen/x281"
+                    android:layout_height="@dimen/y33"
+                    android:gravity="center_vertical|left"
+                    tools:ignore="RtlHardcoded">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/register_type"
+                        android:textSize="@dimen/x11"
+                        android:textColor="@color/dimgray"/>
 
                     <Spinner
                         android:id="@+id/reg_type"
-                        android:layout_width="200px"
+                        android:layout_width="@dimen/x107"
                         android:layout_height="wrap_content"
                         android:entries="@array/user_type"
                         android:gravity="center"
                         android:theme="@style/MyEditText"/>
 
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="性别:"
-                        android:textColor="#747272"
+                        android:text="@string/register_sex"
+                        android:textSize="@dimen/x11"
+                        android:textColor="@color/dimgray"
                         android:layout_marginLeft="10dp"/>
-
 
                     <Spinner
                         android:id="@+id/reg_sex"
-                        android:layout_width="200px"
+                        android:layout_width="@dimen/x70"
                         android:layout_height="wrap_content"
                         android:entries="@array/user_sex"
                         android:gravity="center"
                         android:theme="@style/MyEditText">
-
                     </Spinner>
 
                 </LinearLayout>
-
             </LinearLayout>
-
 
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="427px"
-            android:layout_height="70px"
-            android:gravity="center">
+            android:layout_width="@dimen/x228"
+            android:layout_height="@dimen/y33"
+            android:layout_gravity="center_horizontal">
 
             <Button
                 android:id="@+id/reg_addFace"
-                android:layout_width="150px"
+                android:layout_width="@dimen/x80"
                 android:layout_height="match_parent"
+                android:textSize="@dimen/x11"
                 android:layout_weight="1"
-                android:text="添加模板" />
+                android:text="@string/register_add_template" />
 
             <Button
                 android:id="@+id/reg_close"
-                android:layout_width="150px"
+                android:layout_width="@dimen/x80"
                 android:layout_height="match_parent"
+                android:textSize="@dimen/x11"
                 android:layout_weight="1"
-                android:text="返回验证界面" />
+                android:text="@string/register_back" />
         </LinearLayout>
 
     </LinearLayout>

@@ -44,21 +44,6 @@
             android:text="设备设置"
             android:textColor="#000"/>
 
-        <!--View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:background="#000" />
-
-        <TextView
-            android:id="@+id/showRecordFrameLayout"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="查看通过记录"
-            android:textColor="#000"/-->
-
-
     </LinearLayout>
 
 </LinearLayout>

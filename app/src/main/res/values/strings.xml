@@ -1,25 +1,36 @@
 <resources>
     <string name="app_name">G68A_SN</string>
+    <string name="register_start_snap">Start Snap</string>
+    <string name="register_name">Name:</string>
+    <string name="register_age">Age:</string>
+    <string name="register_number">NO:</string>
+    <string name="register_id">ID:</string>
+    <string name="register_type">Type:</string>
+    <string name="register_sex">Sex:</string>
+    <string name="register_add_template">Add Template</string>
+    <string name="register_back">Back</string>
+    <string name="register_face_snap">Register Snap Face</string>
+    <string name="register_device_setting">Setting</string>
 
     <string-array name="user_type">
-        <item>未知</item>
-        <item>黑名单</item>
-        <item>白名单</item>
-        <item>顾客</item>
-        <item>业主</item>
-        <item>访客</item>
+        <item>Unknown</item>
+        <item>Blacklist</item>
+        <item>Whitelist</item>
+        <item>Customer</item>
+        <item>Owner</item>
+        <item>Visitor</item>
     </string-array>
 
     <string-array name="user_sex">
-        <item>未知</item>
-        <item>男</item>
-        <item>女</item>
+        <item>Unknown</item>
+        <item>Male</item>
+        <item>Female</item>
     </string-array>
 
     <string-array name="user_time">
-        <item>90天</item>
-        <item>60天</item>
-        <item>30天</item>
+        <item>90 Day</item>
+        <item>60 Day</item>
+        <item>30 Day</item>
     </string-array>
 
     <string name="filter_vcode">0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ</string>

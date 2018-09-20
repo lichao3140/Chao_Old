@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_name">G68A_SN</string>
+    <string name="register_start_snap">开始抓拍</string>
+    <string name="register_name">姓&#160;&#160;&#160;&#160;名:</string>
+    <string name="register_age">年龄:</string>
+    <string name="register_number">工号:</string>
+    <string name="register_id">证件号:</string>
+    <string name="register_type">类&#160;&#160;&#160;&#160;型:</string>
+    <string name="register_sex">性别:</string>
+    <string name="register_add_template">添加模板</string>
+    <string name="register_back">返回验证界面</string>
+    <string name="register_face_snap">人脸抓拍注册</string>
+    <string name="register_device_setting">设备设置</string>
+
+    <string-array name="user_type">
+        <item>未知</item>
+        <item>黑名单</item>
+        <item>白名单</item>
+        <item>顾客</item>
+        <item>业主</item>
+        <item>访客</item>
+    </string-array>
+
+    <string-array name="user_sex">
+        <item>未知</item>
+        <item>男</item>
+        <item>女</item>
+    </string-array>
+
+    <string-array name="user_time">
+        <item>90天</item>
+        <item>60天</item>
+        <item>30天</item>
+    </string-array>
+
+    <string name="filter_vcode">0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
+</resources>
