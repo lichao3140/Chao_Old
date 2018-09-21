@@ -40,6 +40,13 @@ public class FileUtils {
         }
     }
 
+    /**
+     * 保存图片
+     * @param btImage 图片
+     * @param fileName 名称
+     * @param sddir 目录地址
+     * @return
+     */
     public static File saveFile(Bitmap btImage, String fileName,String sddir) {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             String sdCardDir = Environment.getExternalStorageDirectory() + "/FaceAndroid/";

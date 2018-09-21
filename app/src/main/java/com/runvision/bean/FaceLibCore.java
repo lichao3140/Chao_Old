@@ -131,7 +131,7 @@ public class FaceLibCore {
         synchronized (b) {
             ErrorInfo livenessError = engine_Live.startLivenessDetect(data, mWidth, mHeight,
                     LivenessEngine.CP_PAF_NV21, faceInfos, livenessInfos);
-            Log.i("lichao", "startLiveness: errorcode " + livenessError.getCode());
+            //Log.i("lichao", "startLiveness: errorcode " + livenessError.getCode());
             if (livenessError.getCode() == ErrorInfo.MOK) {
                 if (livenessInfos.size() == 0) {
                     Log.e("lichao", "无人脸");
