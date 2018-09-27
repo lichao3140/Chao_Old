@@ -30,10 +30,8 @@ public class Const {
 
     public static int COMPER_NUM = 10;
 
-    // public static float comper_socre = 0.65f;//1：N阈值
     public static float ONEVSMORE_SCORE = 0.70f;//1：N阈值
 
-    // public static float comper_socre_1 = 0.45f;//1：1阈值
     public static float ONEVSONE_SCORE = 0.45f;//1：1阈值
 
     /**

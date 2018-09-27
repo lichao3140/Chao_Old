@@ -165,6 +165,10 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case Const.UPDATE_UI://更新UI
+                    if (!isWirePluggedIn()) {
+                        showHttpUrl.setText("");
+                        Log.e("lichao", "无网线");
+                    }
 
                     if (Const.DELETETEMPLATE == true) {
                         isOpenOneVsMore = false;
@@ -175,7 +179,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                                 isOpenOneVsMore = true;
                             }
                         }, 2000);
-
                     }
 
                     /*更新VMS连接*/
@@ -1727,6 +1730,50 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 在java代码中执行adb命令
+     * @param command
+     * @return
+     */
+    public String execCommand(String command) {
+        Runtime runtime;
+        Process proc = null;
+        StringBuffer stringBuffer = null;
+        try {
+            runtime = Runtime.getRuntime();
+            proc = runtime.exec(command);
+            stringBuffer = new StringBuffer();
+            if (proc.waitFor() != 0) {
+                System.err.println("exit value = " + proc.exitValue());
+            }
+            BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+
+            String line = null;
+            while ((line = in.readLine()) != null) {
+                stringBuffer.append(line + " ");
+            }
+
+        } catch (Exception e) {
+            System.err.println(e);
+        } finally {
+            try {
+                proc.destroy();
+            } catch (Exception e2) {
+            }
+        }
+        return stringBuffer.toString();
+    }
+
+    //判断网线拔插状态
+    //通过命令cat /sys/class/net/eth0/carrier，如果插有网线的话，读取到的值是1，否则为0
+    public boolean isWirePluggedIn(){
+        String state= execCommand("cat /sys/class/net/eth0/carrier");
+        if(state.trim().equals("1")){  //有网线插入时返回1，拔出时返回0
+            return true;
+        }
+        return false;
     }
 
     private class SLecDeviceThread extends Thread {
