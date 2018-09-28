@@ -1370,14 +1370,14 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
      * @param msg
      */
     public void httpError(String msg) {
-        showHttpUrl.setText(msg);
+        showHttpUrl.setText(msg + "---请重启软件，获取IP地址");
     }
 
     /**
      * 关闭服务
      */
     public void httpStop() {
-        showHttpUrl.setText("The HTTP Server is stopped");
+        showHttpUrl.setText("The HTTP Server is stopped---请重启软件，获取IP地址");
     }
 
     /**
@@ -1433,7 +1433,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         if (!SPUtil.getString(Const.KEY_VMSIP, "").equals("") && SPUtil.getInt(Const.KEY_VMSPROT, 0) != 0 && !SPUtil.getString(Const.KEY_VMSUSERNAME, "").equals("") && !SPUtil.getString(Const.KEY_VMSPASSWORD, "").equals("")) {
             //开启socket线程
             socketReconnect(SPUtil.getString(Const.KEY_VMSIP, ""), SPUtil.getInt(Const.KEY_VMSPROT, 0));
-
         }
     }
 
@@ -1697,10 +1696,8 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         }
         if ((currentTime.getTime() - strbeginDate.getTime()) > 0 && (strendDate.getTime() - currentTime.getTime()) > 0) {//使用.getTime方法把时间转化成毫秒数,然后进行比较
             range = true;
-            //  ToastUtil.MyToast(UnlockActivity.this, "当前时间在范围内");
         } else {
             range = false;
-            //  ToastUtil.MyToast(UnlockActivity.this, "您的操作时间已到期,请重新申请操作时间");
         }
         return range;
     }
@@ -1869,14 +1866,11 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                         default:
                     }
                 }
-                //重置
                 icCard = "";
             } catch (Exception e2) {
                 e2.printStackTrace();
-                //重置
                 icCard = "";
             }
-            //重置
             icCard = "";
         }
     };
