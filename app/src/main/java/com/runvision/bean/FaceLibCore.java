@@ -3,6 +3,10 @@ package com.runvision.bean;
 import android.graphics.Rect;
 import android.util.Log;
 
+import com.arcsoft.ageestimation.ASAE_FSDKAge;
+import com.arcsoft.ageestimation.ASAE_FSDKEngine;
+import com.arcsoft.ageestimation.ASAE_FSDKError;
+import com.arcsoft.ageestimation.ASAE_FSDKFace;
 import com.arcsoft.facedetection.AFD_FSDKEngine;
 import com.arcsoft.facedetection.AFD_FSDKError;
 import com.arcsoft.facedetection.AFD_FSDKFace;
@@ -50,6 +54,11 @@ public class FaceLibCore {
      */
     private LivenessEngine engine_Live = null;
 
+    /**
+     * 年龄
+     */
+    private ASAE_FSDKEngine engine_Age = null;
+
     public int initLib() {
         //初始化FD的引擎
         engine_AFD = new AFD_FSDKEngine();
@@ -90,6 +99,15 @@ public class FaceLibCore {
         } else {
             Log.e(TAG, "活体引擎激活失败,错误码：" + activeCode.getCode());
             return (int) activeCode.getCode();
+        }
+
+        //年龄引擎激活
+        engine_Age = new ASAE_FSDKEngine();
+        //初始化人脸检测引擎，使用时请替换申请的APPID和SDKKEY
+        ASAE_FSDKError errAge = engine_Age.ASAE_FSDK_InitAgeEngine(Const.APP_ID_AGE, Const.APP_KEY_AGE);
+        if (errAge.getCode() != ASAE_FSDKError.MOK) {
+            Log.e(TAG, "初始化init_ASAE失败,错误码：" + errAge.getCode());
+            return errAge.getCode();
         }
 
         return 0;
@@ -181,6 +199,27 @@ public class FaceLibCore {
     }
 
     /**
+     * 年龄判断
+     * @param des
+     * @param w
+     * @param h
+     * @param input
+     * @param result
+     * @return
+     */
+    public int FaceAge(byte[] des, int w, int h, List<ASAE_FSDKFace> input, List<ASAE_FSDKAge> result) {
+        int ret = -1;
+        if (engine_Age == null) {
+            return ret;
+        }
+        synchronized (b) {
+            ASAE_FSDKError err = engine_Age.ASAE_FSDK_AgeEstimation_Image(des, w, h, ASAE_FSDKEngine.CP_PAF_NV21, input, result);
+            ret = err.getCode();
+        }
+        return ret;
+    }
+
+    /**
      * 分数比对
      *
      * @param face1
@@ -221,6 +260,10 @@ public class FaceLibCore {
             if (engine_Live != null) {
                 engine_Live.unInitEngine();
                 engine_Live = null;
+            }
+            if (engine_Age != null) {
+                engine_Age.ASAE_FSDK_UninitAgeEngine();
+                engine_Age = null;
             }
         }
     }

@@ -7,6 +7,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.arcsoft.ageestimation.ASAE_FSDKAge;
+import com.arcsoft.ageestimation.ASAE_FSDKEngine;
+import com.arcsoft.ageestimation.ASAE_FSDKFace;
 import com.arcsoft.facedetection.AFD_FSDKFace;
 import com.runvision.bean.AppData;
 import com.runvision.bean.FaceInfo;
@@ -34,6 +37,8 @@ public class FaceFramTask extends AsyncTask<Void, Rect, Void> {
     private ImageStack imageStack;
     private MyCameraSuf mCameraView;
     List<AFD_FSDKFace> result = new ArrayList<AFD_FSDKFace>();
+    List<ASAE_FSDKAge> result_Age = new ArrayList<ASAE_FSDKAge>();
+    List<ASAE_FSDKFace> input_Age = new ArrayList<ASAE_FSDKFace>();
     byte[] des;
     private boolean flag=false;
     public static boolean faceflag=false;
@@ -62,11 +67,25 @@ public class FaceFramTask extends AsyncTask<Void, Rect, Void> {
     protected Void doInBackground(Void... params) {
         while (isRuning) {
             des= CameraHelp.rotateCamera(imageStack.pullImageInfo().getData(), 640, 480, 90);
+            //人脸
             MyApplication.mFaceLibCore.FaceDetection(des, 480, 640, result);
-            if (result.size() != 0) {
+            if (result.size() != 0) { //有人脸
                 //Log.i("lichao", result.get(0).getRect().left + "," + result.get(0).getRect().top);
+                //年龄
+                //人脸框和角度
+                input_Age.add(new ASAE_FSDKFace(new Rect(result.get(0).getRect().left,
+                        result.get(0).getRect().top,
+                        result.get(0).getRect().right,
+                        result.get(0).getRect().bottom), ASAE_FSDKEngine.ASAE_FOC_0));
+                MyApplication.mFaceLibCore.FaceAge(des, 480, 640, input_Age, result_Age);
+                for (ASAE_FSDKAge age : result_Age) {
+                    Log.i("lichao", "Age:" + age.getAge());
+                }
+
                 publishProgress(result.get(0).getRect());
-                faceflag=true;
+                faceflag = true;
+
+                //活体
                 List<com.arcsoft.liveness.FaceInfo> faceInfos = new ArrayList<>();
                 com.arcsoft.liveness.FaceInfo faceInfo = new com.arcsoft.liveness.FaceInfo(result.get(0).getRect(), result.get(0).getDegree());
                 faceInfos.add(faceInfo);
