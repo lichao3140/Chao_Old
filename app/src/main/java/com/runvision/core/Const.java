@@ -75,9 +75,10 @@ public class Const {
     public static final String LIVENESSAPPID = "J3Yscp63XC1M1ut6Fk6DguUGGqdGZocc2c8QK2GfnzTt";
     public static final String LIVENESSSDKKEY = "9LQgVXRmKTXtph3pbzibo9mCErzEC5Gg8yjX3JyU79FP";
 
-    //年龄检测
+    //年龄检测、性别识别
     public static final String APP_ID_AGE = "J3Yscp63XC1M1ut6Fk6DguTeTqKPKJZRZ3BukyHnuE5E";
     public static final String APP_KEY_AGE = "DMco6iZeeVhdeXJKQUENi4zPw7wTu11zGmriBq5e3ang";
+    public static final String APP_KEY_SEX = "DMco6iZeeVhdeXJKQUENi4zX6XCefVprwXCpcU4RNF2K";
 
     //记录人脸定位算法是否成功
     public static boolean afdInit = false;

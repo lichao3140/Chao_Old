@@ -11,6 +11,9 @@ import com.arcsoft.ageestimation.ASAE_FSDKAge;
 import com.arcsoft.ageestimation.ASAE_FSDKEngine;
 import com.arcsoft.ageestimation.ASAE_FSDKFace;
 import com.arcsoft.facedetection.AFD_FSDKFace;
+import com.arcsoft.genderestimation.ASGE_FSDKEngine;
+import com.arcsoft.genderestimation.ASGE_FSDKFace;
+import com.arcsoft.genderestimation.ASGE_FSDKGender;
 import com.runvision.bean.AppData;
 import com.runvision.bean.FaceInfo;
 import com.runvision.bean.FaceLibCore;
@@ -39,6 +42,9 @@ public class FaceFramTask extends AsyncTask<Void, Rect, Void> {
     List<AFD_FSDKFace> result = new ArrayList<AFD_FSDKFace>();
     List<ASAE_FSDKAge> result_Age = new ArrayList<ASAE_FSDKAge>();
     List<ASAE_FSDKFace> input_Age = new ArrayList<ASAE_FSDKFace>();
+    List<ASGE_FSDKGender> result_Sex = new ArrayList<ASGE_FSDKGender>();
+    List<ASGE_FSDKFace> input_Sex = new ArrayList<ASGE_FSDKFace>();
+
     byte[] des;
     private boolean flag=false;
     public static boolean faceflag=false;
@@ -70,9 +76,8 @@ public class FaceFramTask extends AsyncTask<Void, Rect, Void> {
             //人脸
             MyApplication.mFaceLibCore.FaceDetection(des, 480, 640, result);
             if (result.size() != 0) { //有人脸
-                //Log.i("lichao", result.get(0).getRect().left + "," + result.get(0).getRect().top);
-                //年龄
-                //人脸框和角度
+                /**
+                //年龄:人脸框和角度
                 input_Age.add(new ASAE_FSDKFace(new Rect(result.get(0).getRect().left,
                         result.get(0).getRect().top,
                         result.get(0).getRect().right,
@@ -81,6 +86,22 @@ public class FaceFramTask extends AsyncTask<Void, Rect, Void> {
                 for (ASAE_FSDKAge age : result_Age) {
                     Log.i("lichao", "Age:" + age.getAge());
                 }
+
+                //性别
+                input_Sex.add(new ASGE_FSDKFace(new Rect(result.get(0).getRect().left,
+                        result.get(0).getRect().top,
+                        result.get(0).getRect().right,
+                        result.get(0).getRect().bottom), ASGE_FSDKEngine.ASGE_FOC_0));
+                MyApplication.mFaceLibCore.FaceSex(des, 480, 640, input_Sex, result_Sex);
+                for (ASGE_FSDKGender gender : result_Sex) {
+                    switch(gender.getGender()) {
+                        case ASGE_FSDKGender.FEMALE : Log.i("lichao", "gender: FEMALE" ); break;
+                        case ASGE_FSDKGender.MALE: Log.i("lichao", "gender: MALE" ); break;
+                        case ASGE_FSDKGender.UNKNOWN: Log.i("lichao", "gender: UNKNOWN" ); break;
+                        default: break;
+                    }
+                }
+                 **/
 
                 publishProgress(result.get(0).getRect());
                 faceflag = true;

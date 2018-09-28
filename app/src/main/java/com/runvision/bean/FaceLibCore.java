@@ -16,6 +16,10 @@ import com.arcsoft.facerecognition.AFR_FSDKFace;
 import com.arcsoft.facerecognition.AFR_FSDKMatching;
 import com.arcsoft.facetracking.AFT_FSDKEngine;
 import com.arcsoft.facetracking.AFT_FSDKError;
+import com.arcsoft.genderestimation.ASGE_FSDKEngine;
+import com.arcsoft.genderestimation.ASGE_FSDKError;
+import com.arcsoft.genderestimation.ASGE_FSDKFace;
+import com.arcsoft.genderestimation.ASGE_FSDKGender;
 import com.arcsoft.liveness.ErrorInfo;
 import com.arcsoft.liveness.LivenessEngine;
 import com.arcsoft.liveness.LivenessInfo;
@@ -58,6 +62,11 @@ public class FaceLibCore {
      * 年龄
      */
     private ASAE_FSDKEngine engine_Age = null;
+
+    /**
+     * 性别
+     */
+    private ASGE_FSDKEngine engine_Sex = null;
 
     public int initLib() {
         //初始化FD的引擎
@@ -108,6 +117,14 @@ public class FaceLibCore {
         if (errAge.getCode() != ASAE_FSDKError.MOK) {
             Log.e(TAG, "初始化init_ASAE失败,错误码：" + errAge.getCode());
             return errAge.getCode();
+        }
+
+        engine_Sex = new ASGE_FSDKEngine();
+        //初始化人脸检测引擎，使用时请替换申请的APPID和SDKKEY
+        ASGE_FSDKError errSex = engine_Sex.ASGE_FSDK_InitgGenderEngine(Const.APP_ID_AGE,Const.APP_KEY_SEX);
+        if (errSex.getCode() != ASGE_FSDKError.MOK) {
+            Log.e(TAG, "初始化init_ASGE失败,错误码：" + errAge.getCode());
+            return errSex.getCode();
         }
 
         return 0;
@@ -220,6 +237,27 @@ public class FaceLibCore {
     }
 
     /**
+     * 性别判断
+     * @param des
+     * @param w
+     * @param h
+     * @param input
+     * @param result
+     * @return
+     */
+    public int FaceSex(byte[] des, int w, int h, List<ASGE_FSDKFace> input, List<ASGE_FSDKGender> result) {
+        int ret = -1;
+        if (engine_Sex == null) {
+            return ret;
+        }
+        synchronized (b) {
+            ASGE_FSDKError err = engine_Sex.ASGE_FSDK_GenderEstimation_Image(des, w, h, ASGE_FSDKEngine.CP_PAF_NV21, input, result);
+            ret =err.getCode();
+        }
+        return ret;
+    }
+
+    /**
      * 分数比对
      *
      * @param face1
@@ -264,6 +302,10 @@ public class FaceLibCore {
             if (engine_Age != null) {
                 engine_Age.ASAE_FSDK_UninitAgeEngine();
                 engine_Age = null;
+            }
+            if (engine_Sex != null) {
+                engine_Sex.ASGE_FSDK_UninitGenderEngine();
+                engine_Sex = null;
             }
         }
     }
