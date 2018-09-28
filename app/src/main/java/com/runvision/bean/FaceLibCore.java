@@ -110,6 +110,7 @@ public class FaceLibCore {
             return (int) activeCode.getCode();
         }
 
+        /**
         //年龄引擎激活
         engine_Age = new ASAE_FSDKEngine();
         //初始化人脸检测引擎，使用时请替换申请的APPID和SDKKEY
@@ -126,6 +127,7 @@ public class FaceLibCore {
             Log.e(TAG, "初始化init_ASGE失败,错误码：" + errAge.getCode());
             return errSex.getCode();
         }
+         **/
 
         return 0;
     }

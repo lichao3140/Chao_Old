@@ -53,10 +53,6 @@ public class FaceFramTask extends AsyncTask<Void, Rect, Void> {
         isRuning = runing;
     }
 
-//    public FaceFramTask(MyCameraSuf myCameraSuf){
-////            this.myCameraSuf=myCameraSuf;
-////    }
-
     public FaceFramTask(Handler handler, MyCameraSuf mCameraView) {
         this.handler = handler;
         this.mCameraView = mCameraView;
