@@ -64,21 +64,16 @@ public class Const {
      */
     public static final int G68A_WIDTH = 600;
 
-    public static final String APP_ID = "J3Yscp63XC1M1ut6Fk6DguT9pEGgKYkXZVcfUQmsFDZC";
-    public static final String APP_KEY_FD = "4wY3J6N2MQvjY1wAtg51niqvMheQ57mU2VdZ9e6gP2kB";
-    public static final String APP_KEY_FR = "4wY3J6N2MQvjY1wAtg51nir3X6uX5LAVPFCXTXVeXRD7";
+    public static final String APP_ID = "J3Yscp63XC1M1ut6Fk6DguTtndqj59Y3wTQcGJtQur5r";
+    public static final String APP_KEY_FD = "94iPZ7LMDyoDznioW6hFJhvtQGVpkezWbnDSPZfMaofj";
+    public static final String APP_KEY_FT = "94iPZ7LMDyoDznioW6hFJhvmEsEfZsxe5yivs4gbMwKC";
+    public static final String APP_KEY_FR = "94iPZ7LMDyoDznioW6hFJhwP3sYTk2mz9Qz9nA52CVYM";
+    public static final String APP_KEY_AGE = "94iPZ7LMDyoDznioW6hFJhwdNg4pLf6SsJPqXtFWWEH7";
+    public static final String APP_KEY_GEN = "94iPZ7LMDyoDznioW6hFJhwkY5L2ctnincGmrNYyQCiZ";
 
     // 活体检测
-    public static final String FREESDKAPPID = "J3Yscp63XC1M1ut6Fk6DguTmdEaYzya4tb3teTZZZbAp";
-    public static final String FDSDKKEY = "5VkbWAVASfvjVKGnnkdzu5n6xQgpjRKT2Acr8dzgsqzE";
-    public static final String FTSDKKEY = "5VkbWAVASfvjVKGnnkdzu5myo1RheXt6ToyELTBqvvgu";
     public static final String LIVENESSAPPID = "J3Yscp63XC1M1ut6Fk6DguUGGqdGZocc2c8QK2GfnzTt";
     public static final String LIVENESSSDKKEY = "9LQgVXRmKTXtph3pbzibo9mCErzEC5Gg8yjX3JyU79FP";
-
-    //年龄检测、性别识别
-    public static final String APP_ID_AGE = "J3Yscp63XC1M1ut6Fk6DguTeTqKPKJZRZ3BukyHnuE5E";
-    public static final String APP_KEY_AGE = "DMco6iZeeVhdeXJKQUENi4zPw7wTu11zGmriBq5e3ang";
-    public static final String APP_KEY_SEX = "DMco6iZeeVhdeXJKQUENi4zX6XCefVprwXCpcU4RNF2K";
 
     //记录人脸定位算法是否成功
     public static boolean afdInit = false;

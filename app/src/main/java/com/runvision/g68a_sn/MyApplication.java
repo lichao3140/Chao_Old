@@ -67,7 +67,7 @@ public class MyApplication extends Application {
 //            finishActivity();
 //        }
 
-        int ret = mFaceLibCore.initLib();
+        int ret = mFaceLibCore.initLib(context);
         if (ret == 0) {
             Toast.makeText(this, "算法初始化成功", Toast.LENGTH_SHORT).show();
         } else {

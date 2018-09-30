@@ -1,5 +1,6 @@
 package com.runvision.bean;
 
+import android.content.Context;
 import android.graphics.Rect;
 import android.util.Log;
 
@@ -68,13 +69,12 @@ public class FaceLibCore {
      */
     private ASGE_FSDKEngine engine_Sex = null;
 
-    public int initLib() {
+    public int initLib(Context context) {
         //初始化FD的引擎
         engine_AFD = new AFD_FSDKEngine();
         AFD_FSDKError error = engine_AFD.AFD_FSDK_InitialFaceEngine(Const.APP_ID, Const.APP_KEY_FD, AFD_FSDKEngine.AFD_OPF_0_HIGHER_EXT, 16, 1);
         if (error.getCode() != AFD_FSDKError.MOK) {
             Log.e(TAG, "初始化init_AFD失败,错误码:" + error.getCode());
-            engine_AFD = null;
             return error.getCode();
         }
 
@@ -82,14 +82,13 @@ public class FaceLibCore {
         engine_AFR = new AFR_FSDKEngine();
         AFR_FSDKError err = engine_AFR.AFR_FSDK_InitialEngine(Const.APP_ID, Const.APP_KEY_FR);
         if (err.getCode() != AFR_FSDKError.MOK) {
-            Log.e(TAG, "初始化init_AFR失败,错误码:" + error.getCode());
-            engine_AFD = null;
+            Log.e(TAG, "初始化init_AFR失败,错误码:" + err.getCode());
             return err.getCode();
         }
 
         //初始化FT的引擎
         engine_AFT = new AFT_FSDKEngine();
-        AFT_FSDKError aft_fsdkError = engine_AFT.AFT_FSDK_InitialFaceEngine(Const.FREESDKAPPID, Const.FTSDKKEY, AFT_FSDKEngine.AFT_OPF_0_HIGHER_EXT, 16, 5);
+        AFT_FSDKError aft_fsdkError = engine_AFT.AFT_FSDK_InitialFaceEngine(Const.APP_ID, Const.APP_KEY_FT, AFT_FSDKEngine.AFT_OPF_0_HIGHER_EXT, 16, 5);
         if(aft_fsdkError.getCode() != AFT_FSDKError.MOK) {
             Log.e(TAG, "初始化init_AFT失败,错误码：" + aft_fsdkError.getCode());
             return aft_fsdkError.getCode();
@@ -97,10 +96,10 @@ public class FaceLibCore {
 
         //活体引擎激活
         engine_Live = new LivenessEngine();
-        ErrorInfo activeCode = engine_Live.activeEngine(Const.LIVENESSAPPID, Const.LIVENESSSDKKEY);
+        ErrorInfo activeCode = engine_Live.activeEngine(context, Const.LIVENESSAPPID, Const.LIVENESSSDKKEY);
         if (activeCode.getCode() == ErrorInfo.MOK || activeCode.getCode() == ErrorInfo.MERR_AL_BASE_ALREADY_ACTIVATED) {
             //初始化Live的引擎
-            ErrorInfo errorInfo = engine_Live.initEngine(LivenessEngine.AL_DETECT_MODE_VIDEO);
+            ErrorInfo errorInfo = engine_Live.initEngine(context, LivenessEngine.AL_DETECT_MODE_VIDEO);
             if(errorInfo.getCode() != ErrorInfo.MOK) {
                 Log.e(TAG, "活体初始化失败,错误码：" + errorInfo.getCode());
                 return (int) errorInfo.getCode();
@@ -114,7 +113,7 @@ public class FaceLibCore {
         //年龄引擎激活
         engine_Age = new ASAE_FSDKEngine();
         //初始化人脸检测引擎，使用时请替换申请的APPID和SDKKEY
-        ASAE_FSDKError errAge = engine_Age.ASAE_FSDK_InitAgeEngine(Const.APP_ID_AGE, Const.APP_KEY_AGE);
+        ASAE_FSDKError errAge = engine_Age.ASAE_FSDK_InitAgeEngine(Const.APP_ID, Const.APP_KEY_AGE);
         if (errAge.getCode() != ASAE_FSDKError.MOK) {
             Log.e(TAG, "初始化init_ASAE失败,错误码：" + errAge.getCode());
             return errAge.getCode();
@@ -122,12 +121,12 @@ public class FaceLibCore {
 
         engine_Sex = new ASGE_FSDKEngine();
         //初始化人脸检测引擎，使用时请替换申请的APPID和SDKKEY
-        ASGE_FSDKError errSex = engine_Sex.ASGE_FSDK_InitgGenderEngine(Const.APP_ID_AGE,Const.APP_KEY_SEX);
+        ASGE_FSDKError errSex = engine_Sex.ASGE_FSDK_InitgGenderEngine(Const.APP_ID,Const.APP_KEY_GEN);
         if (errSex.getCode() != ASGE_FSDKError.MOK) {
             Log.e(TAG, "初始化init_ASGE失败,错误码：" + errAge.getCode());
             return errSex.getCode();
         }
-         **/
+        **/
 
         return 0;
     }
