@@ -126,6 +126,7 @@ public class Const {
 
     public static final String TEMP_DIR = "FaceTemplate";
 
+    public static final String MOBILE_SAFE_PSD = "666666";
     /**
      * SharedPreferences 的 KEY
      */

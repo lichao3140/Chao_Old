@@ -25,6 +25,7 @@ import com.arcsoft.liveness.ErrorInfo;
 import com.arcsoft.liveness.LivenessEngine;
 import com.arcsoft.liveness.LivenessInfo;
 import com.runvision.core.Const;
+import com.runvision.utils.JniUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -128,6 +129,8 @@ public class FaceLibCore {
         }
         **/
 
+//        Log.e(TAG, "====JNI===" + JniUtil.getAPPID());
+//        Log.e(TAG, "====JNI===" + JniUtil.getSDKKEY());
         return 0;
     }
 

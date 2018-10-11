@@ -2,6 +2,7 @@ package com.runvision.g68a_sn;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -20,8 +21,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -167,7 +171,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                 case Const.UPDATE_UI://更新UI
                     if (!isWirePluggedIn()) {
                         showHttpUrl.setText("");
-                        Log.e("lichao", "无网线");
+                        //Log.e("lichao", "无网线");
                     }
 
                     if (Const.DELETETEMPLATE == true) {
@@ -668,7 +672,8 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         home_set.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(MainActivity.this, RegisterActivity.class));
+                showConfirmPsdDialog();
+//                startActivity(new Intent(MainActivity.this, RegisterActivity.class));
             }
         });
     }
@@ -998,6 +1003,44 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                 Const.ONE_VS_MORE_TIMEOUT_NUM++;
             }
         }
+    }
+
+    private void showConfirmPsdDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final AlertDialog dialog = builder.create();
+        final View view = View.inflate(this, R.layout.dialog_confirm_psd, null);
+        //让对话框显示一个自己定义的对话框界面效果
+        dialog.setView(view);
+        dialog.show();
+        Button bt_submit = view.findViewById(R.id.bt_submit);
+        Button bt_cancel = view.findViewById(R.id.bt_cancel);
+
+        bt_submit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditText et_confirm_psd = view.findViewById(R.id.et_confirm_psd);
+                String confirmPsd = et_confirm_psd.getText().toString();
+                String psd = Const.MOBILE_SAFE_PSD;
+                if(!TextUtils.isEmpty(confirmPsd)){
+                    if(psd.equals(confirmPsd)) {
+                        Intent intent = new Intent(getApplicationContext(), RegisterActivity.class);
+                        startActivity(intent);
+                        dialog.dismiss();
+                    } else {
+                        showToast("输入密码错误");
+                    }
+                }else{
+                    showToast("请输入密码");
+                }
+            }
+        });
+
+        bt_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
     }
 
     /**
