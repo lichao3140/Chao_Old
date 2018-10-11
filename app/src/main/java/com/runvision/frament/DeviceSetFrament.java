@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -28,7 +29,7 @@ public class DeviceSetFrament extends android.support.v4.app.Fragment implements
 
     private View view;
     private TextView threshold_1,threshold_n,wait_for_time,open_time,device_ip,vms_ip,vms_port,vms_uername,vms_password;
-   // private CheckBox cb_choice;
+    private CheckBox cb_choice;
     private Spinner Preservation_time;
     private Button btn_Sure,btn_Refresh;
     private Context mContext;
@@ -56,7 +57,7 @@ public class DeviceSetFrament extends android.support.v4.app.Fragment implements
         vms_uername=(TextView)view.findViewById(R.id.vms_uername);
         vms_password=(TextView)view.findViewById(R.id.vms_password);
 
-      //  cb_choice=(CheckBox)view.findViewById(R.id.cb_choice);
+        cb_choice=(CheckBox)view.findViewById(R.id.cb_choice);
 
         btn_Sure=(Button)view.findViewById(R.id.btn_Sure);
         btn_Sure.setOnClickListener(this);
@@ -70,18 +71,13 @@ public class DeviceSetFrament extends android.support.v4.app.Fragment implements
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 String sexNumber = DeviceSetFrament.this.getResources().getStringArray(R.array.user_time)[i];
                 System.out.println(sexNumber);
-                if(sexNumber.equals("90天"))
-                {
+                if (sexNumber.equals("90天")) {
                     preservation_day=90;
-                }else if(sexNumber.equals("60天"))
-                {
+                } else if(sexNumber.equals("60天")) {
                     preservation_day=60;
-                }
-                else if(sexNumber.equals("30天"))
-                {
+                } else if(sexNumber.equals("30天")) {
                     preservation_day=30;
                 }
-
             }
 
             @Override
@@ -100,23 +96,18 @@ public class DeviceSetFrament extends android.support.v4.app.Fragment implements
         device_ip.setText(CameraHelp.getIpAddress());
 
         //Preservation_time.set(SPUtil.getInt(Const.KEY_PRESERVATION_DAY,90));
-        if(SPUtil.getInt(Const.KEY_PRESERVATION_DAY,90)==90) {
+        if (SPUtil.getInt(Const.KEY_PRESERVATION_DAY,90) == 90) {
             Preservation_time.setSelection(0);
-        }else if(SPUtil.getInt(Const.KEY_PRESERVATION_DAY,90)==60)
-        {
+        } else if(SPUtil.getInt(Const.KEY_PRESERVATION_DAY,90) == 60) {
             Preservation_time.setSelection(1);
-        }else if(SPUtil.getInt(Const.KEY_PRESERVATION_DAY,90)==30)
-        {
+        } else if(SPUtil.getInt(Const.KEY_PRESERVATION_DAY,90) == 30) {
             Preservation_time.setSelection(2);
         }
-      /*  if(SPUtil.getBoolean(Const.KEY_ISOPENMUSIC, Const.OPEN_MUSIC)==true)
-        {
+        if (SPUtil.getBoolean(Const.KEY_ISOPENLIVE, Const.OPEN_LIVE)==true) {
             cb_choice.setChecked(true);
-        }
-        else
-        {
+        } else {
             cb_choice.setChecked(false);
-        }*/
+        }
         vms_ip.setText(SPUtil.getString(Const.KEY_VMSIP, ""));
         vms_port.setText(Integer.toString(SPUtil.getInt(Const.KEY_VMSPROT,0)));
         vms_uername.setText(SPUtil.getString(Const.KEY_VMSUSERNAME, ""));
@@ -134,14 +125,11 @@ public class DeviceSetFrament extends android.support.v4.app.Fragment implements
 
         SPUtil.putInt(Const.KEY_PRESERVATION_DAY, preservation_day);
 
-      /*  if(cb_choice.isChecked()==true)
-        {
-            SPUtil.putBoolean(Const.KEY_ISOPENMUSIC,true);
+        if (cb_choice.isChecked() == true) {
+            SPUtil.putBoolean(Const.KEY_ISOPENLIVE, true);
+        } else {
+            SPUtil.putBoolean(Const.KEY_ISOPENLIVE, false);
         }
-        else
-        {
-            SPUtil.putBoolean(Const.KEY_ISOPENMUSIC,false);
-        }*/
 
         SPUtil.putString(Const.KEY_VMSIP, vms_ip.getText().toString().trim());
         SPUtil.putInt(Const.KEY_VMSPROT, Integer.parseInt(vms_port.getText().toString().trim()));
@@ -183,12 +171,10 @@ public class DeviceSetFrament extends android.support.v4.app.Fragment implements
 
     // 修改设置（IP�?????
     public static int updateSetting(String deviceip,Context context) {
-        if(deviceip.equals(CameraHelp.getIpAddress()))
-        {
+        if (deviceip.equals(CameraHelp.getIpAddress())) {
             return 1;
         }
-        if(deviceip.equals(""))
-        {
+        if(deviceip.equals("")) {
             return 2;
         }
             String[] Sip = deviceip.split("\\.");

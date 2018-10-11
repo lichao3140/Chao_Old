@@ -23,6 +23,7 @@ import com.runvision.g68a_sn.MainActivity;
 import com.runvision.g68a_sn.MyApplication;
 import com.runvision.myview.MyCameraSuf;
 import com.runvision.utils.CameraHelp;
+import com.runvision.utils.SPUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -107,12 +108,22 @@ public class FaceFramTask extends AsyncTask<Void, Rect, Void> {
                 com.arcsoft.liveness.FaceInfo faceInfo = new com.arcsoft.liveness.FaceInfo(result.get(0).getRect(), result.get(0).getDegree());
                 faceInfos.add(faceInfo);
                 // detect活体验证
-                if(!flag && MyApplication.mFaceLibCore.detect(des, 480, 640, faceInfos)) {
-                    FaceInfo info = new FaceInfo(des, result.get(0));
-                    Message msg = new Message();
-                    msg.obj = info;
-                    msg.what = Const.MSG_FACE;
-                    handler.sendMessage(msg);
+                if (SPUtil.getBoolean(Const.KEY_ISOPENLIVE, Const.OPEN_LIVE) == true) {
+                    if(!flag && MyApplication.mFaceLibCore.detect(des, 480, 640, faceInfos)) {
+                        FaceInfo info = new FaceInfo(des, result.get(0));
+                        Message msg = new Message();
+                        msg.obj = info;
+                        msg.what = Const.MSG_FACE;
+                        handler.sendMessage(msg);
+                    }
+                } else {
+                    if(!flag) {
+                        FaceInfo info = new FaceInfo(des, result.get(0));
+                        Message msg = new Message();
+                        msg.obj = info;
+                        msg.what = Const.MSG_FACE;
+                        handler.sendMessage(msg);
+                    }
                 }
             } else {
                 Log.i("lichao", "无人脸");
