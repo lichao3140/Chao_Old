@@ -1,6 +1,18 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        debug {
+            //keystore中key的别名
+            keyAlias 'key0'
+            //keystore中key的密码
+            keyPassword 'lichao'
+            //keystore的文件路径，可以是绝对路径也可以是相对路径
+            storeFile file('src/main/assets/android_key.jks')
+            //keystore的密码
+            storePassword 'lichao'
+        }
+    }
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.runvision.g68a_sn"
