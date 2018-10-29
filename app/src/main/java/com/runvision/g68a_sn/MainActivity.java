@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -138,7 +139,9 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
     private static final int VID = 1024; // IDR VID
     private static final int PID = 50010; // IDR PID
     private IDCardReader idCardReader = null;
+    private UsbManager musbManager = null;
     private boolean ReaderCardFlag = true;
+    private final String ACTION_USB_PERMISSION = "com.example.scarx.idcardreader.USB_PERMISSION";
 
     // ------------------------------这个按钮是设置或以开关的----------------------------------
     //这个按钮是设置或以开关的
@@ -756,7 +759,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
     public void faceComperFrame(Bitmap bmp) {
         //提取人脸
         List<AFD_FSDKFace> result = new ArrayList<AFD_FSDKFace>();
-        byte[] des = CameraHelp.rotateCamera(imageStack.pullImageInfo().getData(), 640, 480, 270);
+        byte[] des = CameraHelp.rotateCamera(imageStack.pullImageInfo().getData(), 640, 480, 90);
         MyApplication.mFaceLibCore.FaceDetection(des, 480, 640, result);
         if (result.size() == 0) {
             return;
@@ -833,12 +836,27 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         Map idrparams = new HashMap();
         idrparams.put(ParameterHelper.PARAM_KEY_VID, VID);
         idrparams.put(ParameterHelper.PARAM_KEY_PID, PID);
-        idCardReader = IDCardReaderFactory.createIDCardReader(this,
-                TransportType.USB, idrparams);
+        idCardReader = IDCardReaderFactory.createIDCardReader(this, TransportType.USB, idrparams);
+        RequestDevicePermission();
         readCard();
-
     }
 
+    private void RequestDevicePermission() {
+        musbManager = (UsbManager)this.getSystemService(Context.USB_SERVICE);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_USB_PERMISSION);
+        filter.addAction(UsbManager.ACTION_USB_ACCESSORY_ATTACHED);
+        mContext.registerReceiver(mUsbReceiver, filter);
+
+        for (UsbDevice device : musbManager.getDeviceList().values()) {
+            if (device.getVendorId() == VID && device.getProductId() == PID)
+            {
+                Intent intent = new Intent(ACTION_USB_PERMISSION);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
+                musbManager.requestPermission(device, pendingIntent);
+            }
+        }
+    }
 
     private void readCard() {
         try {

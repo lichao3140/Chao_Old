@@ -30,9 +30,9 @@ public class Const {
 
     public static int COMPER_NUM = 10;
 
-    public static float ONEVSMORE_SCORE = 0.70f;//1：N阈值
+    public static float ONEVSMORE_SCORE = 0.68f;//1：N阈值
 
-    public static float ONEVSONE_SCORE = 0.45f;//1：1阈值
+    public static float ONEVSONE_SCORE = 0.43f;//1：1阈值
 
     /**
      * 是否注册人脸标志位
