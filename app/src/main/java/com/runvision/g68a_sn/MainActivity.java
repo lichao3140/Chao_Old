@@ -34,6 +34,7 @@ import android.widget.Toast;
 import com.arcsoft.facedetection.AFD_FSDKFace;
 import com.arcsoft.facerecognition.AFR_FSDKFace;
 import com.arcsoft.facerecognition.AFR_FSDKMatching;
+import com.common.pos.api.util.PosUtil;
 import com.runvision.bean.AppData;
 import com.runvision.bean.FaceInfo;
 import com.runvision.bean.ImageStack;
@@ -262,18 +263,17 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                         mHandler.removeMessages(Const.MSG_FACE);
                     }
                     if (faceDetectTask != null) {
-                        if (faceDetectTask.faceflag == true)//检测到有人脸
-                        {
+                        if (faceDetectTask.faceflag == true) {//检测到有人脸
+                            PosUtil.setLedPower(1);
                             logshowflag = 0;
                             if (SerialPort.Fill_in_light == false) {
                                 SerialPort.openLED();
                             }
                         }
                     }
-                    if (SerialPort.Fill_in_light == true) {   //补光灯
+                    if (SerialPort.Fill_in_light == true) {//补光灯
                         timingnum++;
                         if (timingnum >= 100) {
-                            Log.i("zhuhuilong", "Fill_in_light:" + SerialPort.Fill_in_light);
                             SerialPort.Fill_in_light = false;
                             timingnum = 0;
                         }
@@ -743,13 +743,24 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
     }
 
 
-    /*1：1比对操作*/
+    /**
+     * 1:1比对操作
+     * @param bmp
+     */
     public void faceComperFrame(Bitmap bmp) {
         //提取人脸
         List<AFD_FSDKFace> result = new ArrayList<AFD_FSDKFace>();
         byte[] des = CameraHelp.rotateCamera(imageStack.pullImageInfo().getData(), 640, 480, 90);
         MyApplication.mFaceLibCore.FaceDetection(des, 480, 640, result);
         if (result.size() == 0) {
+            return;
+        }
+
+        //活体
+        List<com.arcsoft.liveness.FaceInfo> faceInfos = new ArrayList<>();
+        com.arcsoft.liveness.FaceInfo faceInfo = new com.arcsoft.liveness.FaceInfo(result.get(0).getRect(), result.get(0).getDegree());
+        faceInfos.add(faceInfo);
+        if (!MyApplication.mFaceLibCore.detect(des, 480, 640, faceInfos)) {
             return;
         }
 
@@ -779,9 +790,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         if (ret != 0) {
             return;
         }
-        // System.out.println("人证分数:" + score.getScore());
         AppData.getAppData().setoneCompareScore(score.getScore());
-        //  Log.i("Gavin","oneCompareScore:"+AppData.getAppData().getoneCompareScore());
     }
 
     private BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
@@ -790,7 +799,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
             String action = intent.getAction();
             if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
                 Log.e(TAG, "拔出usb了");
-                UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
                 if (device != null) {
                     Log.e(TAG, "设备的ProductId值为：" + device.getProductId());
                     Log.e(TAG, "设备的VendorId值为：" + device.getVendorId());
@@ -799,7 +808,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                         try {
                             idCardReader.close(0);
                         } catch (IDCardReaderException e) {
-                            // TODO Auto-generated catch block
                             Log.i(TAG, "关闭失败");
                         }
                         IDCardReaderFactory.destroy(idCardReader);
@@ -851,37 +859,34 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
             idCardReader.open(0);
             bStop = false;
             Log.i(TAG, "设备连接成功");
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    while (!bStop) {
-                        long begin = System.currentTimeMillis();
-                        IDCardInfo idCardInfo = new IDCardInfo();
-                        boolean ret = false;
+            new Thread(() -> {
+                while (!bStop) {
+                    long begin = System.currentTimeMillis();
+                    IDCardInfo idCardInfo = new IDCardInfo();
+                    boolean ret = false;
+                    try {
+                        idCardReader.findCard(0);
+                        idCardReader.selectCard(0);
+                    } catch (IDCardReaderException e) {
+                        continue;
+                    }
+                    if (ReaderCardFlag == true) {
                         try {
-                            idCardReader.findCard(0);
-                            idCardReader.selectCard(0);
+                            ret = idCardReader.readCard(0, 0, idCardInfo);
                         } catch (IDCardReaderException e) {
-                            continue;
+                            Log.i(TAG, "读卡失败，错误信息：" + e.getMessage());
                         }
-                        if (ReaderCardFlag == true) {
-                            try {
-                                ret = idCardReader.readCard(0, 0, idCardInfo);
-                            } catch (IDCardReaderException e) {
-                                Log.i(TAG, "读卡失败，错误信息：" + e.getMessage());
-                            }
-                            if (ret) {
-                                Const.ONE_VS_MORE_TIMEOUT_NUM = 0;
-                                isOpenOneVsMore = false;
-                                ReaderCardFlag = false;
-                                final long nTickUsed = (System.currentTimeMillis() - begin);
-                                Log.i(TAG, "success>>>" + nTickUsed + ",name:" + idCardInfo.getName() + "," + idCardInfo.getValidityTime() + "，" + idCardInfo.getDepart());
-                                Message msg = new Message();
-                                msg.what = Const.READ_CARD;
-                                msg.obj = idCardInfo;
-                                mHandler.sendMessage(msg);
+                        if (ret) {
+                            Const.ONE_VS_MORE_TIMEOUT_NUM = 0;
+                            isOpenOneVsMore = false;
+                            ReaderCardFlag = false;
+                            final long nTickUsed = (System.currentTimeMillis() - begin);
+                            Log.i(TAG, "success>>>" + nTickUsed + ",name:" + idCardInfo.getName() + "," + idCardInfo.getValidityTime() + "，" + idCardInfo.getDepart());
+                            Message msg = new Message();
+                            msg.what = Const.READ_CARD;
+                            msg.obj = idCardInfo;
+                            mHandler.sendMessage(msg);
 
-                            }
                         }
                     }
                 }
@@ -927,17 +932,12 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         loadprompt.setText(showmessage);
         promptshow_xml.setVisibility(View.VISIBLE);
         if (audionum != 2) {
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    promptshow_xml.setVisibility(View.GONE);
-                }
-            }, 1500);
+            mHandler.postDelayed(() -> promptshow_xml.setVisibility(View.GONE), 1500);
         }
     }
 
     /**
-     * 1vsn显示对比后成功是否窗口
+     * 1vsN显示对比后成功是否窗口
      */
     private void showAlert() {
         if ((isOpenOneVsMore != false) || (Const.DELETETEMPLATE == false)) {
@@ -972,12 +972,11 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                     return;
                 }
                 GPIOHelper.openDoor(true);
+                PosUtil.setRelayPower(1);//开闸
 
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        GPIOHelper.openDoor(false);
-                    }
+                mHandler.postDelayed(() -> {
+                    GPIOHelper.openDoor(false);
+                    PosUtil.setRelayPower(0);//关闸
                 }, SPUtil.getInt(Const.KEY_OPENDOOR, Const.CLOSE_DOOR_TIME) * 1000);
 
                 oneVsMore_userName.setText(user.getName());
@@ -991,12 +990,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
 
                 oneVsMoreView.setVisibility(View.VISIBLE);
                 playMusic(R.raw.success);
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        oneVsMoreView.setVisibility(View.GONE);
-                    }
-                }, 1000);
+                mHandler.postDelayed(() -> oneVsMoreView.setVisibility(View.GONE), 1000);
 
 
                 if (socketThread != null) {
@@ -1020,36 +1014,28 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         Button bt_submit = view.findViewById(R.id.bt_submit);
         Button bt_cancel = view.findViewById(R.id.bt_cancel);
 
-        bt_submit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EditText et_confirm_psd = view.findViewById(R.id.et_confirm_psd);
-                String confirmPsd = et_confirm_psd.getText().toString();
-                String psd = Const.MOBILE_SAFE_PSD;
-                if(!TextUtils.isEmpty(confirmPsd)){
-                    if(psd.equals(confirmPsd)) {
-                        Intent intent = new Intent(getApplicationContext(), RegisterActivity.class);
-                        startActivity(intent);
-                        dialog.dismiss();
-                    } else {
-                        showToast("输入密码错误");
-                    }
-                }else{
-                    showToast("请输入密码");
+        bt_submit.setOnClickListener(v -> {
+            EditText et_confirm_psd = view.findViewById(R.id.et_confirm_psd);
+            String confirmPsd = et_confirm_psd.getText().toString();
+            String psd = Const.MOBILE_SAFE_PSD;
+            if(!TextUtils.isEmpty(confirmPsd)){
+                if(psd.equals(confirmPsd)) {
+                    Intent intent = new Intent(getApplicationContext(), RegisterActivity.class);
+                    startActivity(intent);
+                    dialog.dismiss();
+                } else {
+                    showToast("输入密码错误");
                 }
+            }else{
+                showToast("请输入密码");
             }
         });
 
-        bt_cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.dismiss();
-            }
-        });
+        bt_cancel.setOnClickListener(view1 -> dialog.dismiss());
     }
 
     /**
-     * 1v1显示对比后成功是否窗口
+     * 1vs1显示对比后成功是否窗口
      */
     private void showAlertDialog() {
         String str = "";
@@ -1117,12 +1103,11 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
             isSuccessComper.setImageResource(R.mipmap.icon_tg);
             faceBmp_view.setImageBitmap(AppData.getAppData().getOneFaceBmp());
             GPIOHelper.openDoor(true);
+            PosUtil.setRelayPower(1);//开闸
 
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    GPIOHelper.openDoor(false);
-                }
+            mHandler.postDelayed(() -> {
+                GPIOHelper.openDoor(false);
+                PosUtil.setRelayPower(0);//关闸
             }, SPUtil.getInt(Const.KEY_OPENDOOR, Const.CLOSE_DOOR_TIME) * 1000);
 
             //保存抓拍图片
@@ -1142,11 +1127,9 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
             MyApplication.faceProvider.addRecord(user);
 
 
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    GPIOHelper.openDoor(false);
-                }
+            mHandler.postDelayed(() -> {
+                GPIOHelper.openDoor(false);
+                PosUtil.setRelayPower(0);//关闸
             }, 1000);
             oneVsMoreView.setVisibility(View.GONE);
             alert.setVisibility(View.VISIBLE);
@@ -1164,6 +1147,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                 AppData.getAppData().clean();
             }
         }
+
         if (AppData.getAppData().getoneCompareScore() >= SPUtil.getFloat(Const.KEY_CARDSCORE, Const.ONEVSONE_SCORE) && AppData.getAppData().getOneFaceBmp() != null) {
 //            Log.i("Gavin","人证成功："+socketThread.toString());
             if (socketThread != null) {
@@ -1176,14 +1160,9 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         AppData.getAppData().setoneCompareScore(0);
         ReaderCardFlag = true;
         //ReaderCardFlag = true;
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                // AppData.getAppData().setOneFaceBmp(null);
-                oneVsMoreView.setVisibility(View.GONE);
-                alert.setVisibility(View.GONE);
-                // isOpenOneVsMore = true;
-            }
+        mHandler.postDelayed(() -> {
+            oneVsMoreView.setVisibility(View.GONE);
+            alert.setVisibility(View.GONE);
         }, 2000);
     }
 
@@ -1230,11 +1209,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                     if (score == null) {
                         score = new AFR_FSDKMatching();
                     }
-                    Log.i("GavinTest", "for前" + System.currentTimeMillis());
                     if (MyApplication.mList.size() > 0) {
-
-                        Log.i("Gavin0903", "for");
-
                       /*  Iterator iter = MyApplication.mList.entrySet().iterator();
                         while (iter.hasNext()) {
                             if((isOpenOneVsMore==false)||(Const.BATCH_IMPORT_TEMPLATE==true))
@@ -1260,10 +1235,8 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                             }
                         }*/
 
-
                         for (Map.Entry<String, byte[]> entry : MyApplication.mList.entrySet()) {
                             if ((isOpenOneVsMore == false) || (Const.BATCH_IMPORT_TEMPLATE == true) || (Const.DELETETEMPLATE == true)) {
-                                //  AppData.getAppData().setCompareScore(0);
                                 continue;
                             }
                             String fileName = (String) entry.getKey();
@@ -1286,9 +1259,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                                 continue;
                             }
                         }
-                        Log.i("GavinTest", "for后" + System.currentTimeMillis());
-                        Log.i("GavinTest", "fenshu:" + fenshu);
-                        // AppData.getAppData().setCompareScore(fenshu);
                         AppData.getAppData().setCompareScore(fenshu);
                     }
                 } else {
@@ -1334,7 +1304,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         public void run() {
             super.run();
             while (true) {
-                //Log.i("Gavin","redflag:" +redflag);
                 // G68A设备红外接口不一样
                 int status = GPIOHelper.readStatus();
                 status = 1;
@@ -1563,14 +1532,12 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
     }
 
     private void batchImport() {
-
         List<File> mImportFile = getImagePathFile();
         if (mImportFile == null) {
             return;
         }
 
         //vms_Import_template=true;
-
         Const.VMS_BATCH_IMPORT_TEMPLATE = true;
         // Const.BATCH_FLAG=1;
 
@@ -1599,7 +1566,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
 
     /**
      * 检查扩展名，得到图片格式的文件
-     *
      * @param fName 文件名
      * @return
      */
@@ -1794,52 +1760,5 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         }
         return false;
     }
-
-    /**
-     * 退出读卡状态
-     */
-    private Runnable cancelCardRunnable = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                //处理icCard
-                Log.e("gzy", "接收到的串口数据为: " + icCard);
-
-                final byte[] bytes = SlecProtocol.asciiToHex(SlecProtocol.hexToByteArray(icCard));
-                if (bytes.length > 5) {
-                    Log.e("gzy", "接收转换: " + SlecProtocol.bytesToHexString2(bytes, bytes.length) +
-                            "--命令：" + bytes[3] +
-                            "--数据长度：" + bytes[5] +
-                            "--数据：" + (bytes[5] == 0 ? "没有数据" : bytes[6])
-                    );
-                    switch (bytes[3]) {
-                        case 1:
-                            if (bytes[6] == 0) {
-                                Log.e("gzy", "run: 发送开门指令成功");
-                            } else {
-                                Log.e("gzy", "run: 发送开门指令失败");
-                            }
-                            break;
-                        case 2:
-                            //刷卡
-                            //6-9是用户id，10-13是卡号
-                            if (bytes.length > 13) {
-                                final byte[] card = new byte[4];
-                                for (int i = 0; i < card.length; i++) {
-                                    card[i] = bytes[10 + i];
-                                }
-                            }
-                            break;
-                        default:
-                    }
-                }
-                icCard = "";
-            } catch (Exception e2) {
-                e2.printStackTrace();
-                icCard = "";
-            }
-            icCard = "";
-        }
-    };
 
 }
