@@ -103,31 +103,23 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
     private View oneVsMoreView;  //1:N
     private ImageView oneVsMore_face, oneVsMore_temper;
     private TextView oneVsMore_userName, oneVsMore_userID, oneVsMore_userType;
-
     private View alert; //1:1
     private ImageView faceBmp_view, cardBmp_view, idcard_Bmp, isSuccessComper;
     private TextView card_name, card_sex, card_nation, name, year, month, day, addr, cardNumber, version;
-
     private ImageView home_set;
-
     private View pro_xml;//刷卡标记
 
     public int logshowflag = 0;
+    private boolean LEDFlag = false;
 
     private MediaPlayer mPlayer;//音频
-
-    private boolean TipsFlag = false;
-
     private FaceFramTask faceDetectTask = null;
-
     private boolean bStop = false;
-
     private boolean oneVsMoreThreadStauts = false;
     private boolean isOpenOneVsMore = true;
     private boolean Infra_red = true;
     private ImageStack imageStack;
 
-    public boolean comparisonEnd = false;
     private int timingnum = 0;
 
     private MyApplication application;
@@ -139,7 +131,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
     private boolean ReaderCardFlag = true;
     private final String ACTION_USB_PERMISSION = "com.example.scarx.idcardreader.USB_PERMISSION";
 
-    // ------------------------------这个按钮是设置或以开关的----------------------------------
     //这个按钮是设置或以开关的
     private NetWorkStateReceiver receiver;
     private TextView socket_status;
@@ -148,7 +139,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
     private HeartBeatThread heartBeatThread;
     private TextView showHttpUrl;
     private ServerManager serverManager;
-    private int socketErrorNum = 0;
 
     private Dialog dialog = null;
     private int templatenum = 0;
@@ -156,10 +146,8 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
     private Toast mToast;
 
     private Boolean SysTimeflag = true;
-
     List<User> mList;
 
-    // private boolean vms_Import_template=false;
     /**
      * 消息响应
      */
@@ -170,17 +158,13 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                 case Const.UPDATE_UI://更新UI
                     if (!isWirePluggedIn()) {
                         showHttpUrl.setText("");
-                        //Log.e("lichao", "无网线");
                     }
 
                     if (Const.DELETETEMPLATE == true) {
                         isOpenOneVsMore = false;
-                        mHandler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                Const.DELETETEMPLATE = false;
-                                isOpenOneVsMore = true;
-                            }
+                        mHandler.postDelayed(() -> {
+                            Const.DELETETEMPLATE = false;
+                            isOpenOneVsMore = true;
                         }, 2000);
                     }
 
@@ -196,44 +180,26 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                     /*每天重启操作*/
                     DateFormat df = new SimpleDateFormat("HH:mm:ss");
                     if (df.format(new Date()).equals("02:00:00")) {
-                        Log.i("zhuhuilong", "data" + df.format(new Date()));
                         rebootSU();
                     }
 
                     /*设置删除数据操作*/
                     String time1 = TestDate.SGetSysTime();
-                    // String time2=TestDate.getSupportEndDayofMonth(new Date());
                     if ((df.format(new Date()).equals("00:00:00")) && SysTimeflag == true) {
-                        // TestDate.getTime();
                         SysTimeflag = false;
-                        Log.i("zhuhuilong", "data" + TestDate.getSupportBeginDayofMonth(new Date()));
-                        Log.i("zhuhuilong", "data" + TestDate.getDateBefore(new Date(), SPUtil.getInt(Const.KEY_PRESERVATION_DAY, 90)));
-                        Log.i("zhuhuilong", "data" + TestDate.getTime(time1));
-                        Log.i("zhuhuilong", "data" + TestDate.timetodate(TestDate.getTime(time1)));
 
                         String time11 = TestDate.timetodate(TestDate.getTime(time1));
-                        //String time22 = TestDate.timetodate(TestDate.getSupportBeginDayofMonth(new Date()));
                         String time22 = TestDate.getDateBefore(new Date(), SPUtil.getInt(Const.KEY_PRESERVATION_DAY, 90));
 
                         if (MyApplication.faceProvider.quaryUserTableRowCount("select count(id) from tUser") != 0) {
-                            Log.i("zhuhuilong", "quaryUserTableRowCount:不为0");
                             mList = MyApplication.faceProvider.getAllPoints();
-                            Log.i("zhuhuilong", "mList:" + mList.size());
-                            Log.i("zhuhuilong", "mList:" + mList.toArray());
                             for (int i = 0; i < mList.size(); i++) {
-                                Log.i("zhuhuilong", "mList.get(i).getTime():" + mList.get(i).getTime());
-                                Log.i("zhuhuilong", "mList.get(i).getTime():" + mList.get(i).getId());
                                 if (TimeCompare(time11, time22, TestDate.timetodate(String.valueOf(mList.get(i).getTime()))))//String.valueOf(mList.get(i).getTime())))
                                 {
                                     List<User> mList1 = MyApplication.faceProvider.queryRecord("select * from tRecord where id=" + (mList.get(i).getId()));
                                     FileUtils.deleteTempter(mList1.get(0).getTemplateImageID());
                                     FileUtils.deleteTempter(mList1.get(0).getRecord().getSnapImageID());
                                     MyApplication.faceProvider.deleteRecord(mList.get(i).getId());
-
-                                    Log.i("zhuhuilong", "mList.get(i).getTime():" + mList1.get(0).getTemplateImageID());
-                                    Log.i("zhuhuilong", "mList.get(i).getTime():" + mList1.get(0).getRecord().getSnapImageID());
-                                    Log.i("zhuhuilong", "true");
-
                                 }
                             }
                         }
@@ -243,17 +209,14 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                     if (promptshow_xml.getVisibility() == View.VISIBLE) {
                         oneVsMoreView.setVisibility(View.GONE);
                         pro_xml.setVisibility(View.GONE);
-                        // home_layout.setVisibility(View.GONE);
                     }
                     if (alert.getVisibility() == View.VISIBLE) {
-                        // AppData.getAppData().setCompareScore(0);
                         home_layout.setVisibility(View.GONE);
                         oneVsMoreView.setVisibility(View.GONE);
                         pro_xml.setVisibility(View.GONE);
                     }
                     if (home_layout.getVisibility() == View.VISIBLE) {
                         oneVsMoreView.setVisibility(View.GONE);
-                        // promptshow_xml.setVisibility(View.GONE);
                         alert.setVisibility(View.GONE);
                         pro_xml.setVisibility(View.GONE);
                         Infra_red = false;
@@ -264,7 +227,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                     }
                     if (faceDetectTask != null) {
                         if (faceDetectTask.faceflag == true) {//检测到有人脸
-                            PosUtil.setLedPower(1);
                             logshowflag = 0;
                             if (SerialPort.Fill_in_light == false) {
                                 SerialPort.openLED();
@@ -274,7 +236,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                     if (SerialPort.Fill_in_light == true) {//补光灯
                         timingnum++;
                         if (timingnum >= 100) {
-                            SerialPort.Fill_in_light = false;
+                            LEDFlag = false;
                             timingnum = 0;
                         }
                     }
@@ -289,14 +251,12 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                         if (mMyRedThread != null) {
                             mMyRedThread.closeredThread();
                         }
-                        // home_layout.setVisibility(View.VISIBLE);
                         templatenum = 0;
                         template++;
                         ReaderCardFlag = false;
                         Const.BATCH_IMPORT_TEMPLATE = false;
                         Const.BATCH_FLAG = 2;
                         showToast("正在导入模板,停止比对！");
-                        // Toast.makeText(mContext, "正在导入模板", Toast.LENGTH_SHORT).show();
                     }
                     if ((template >= 5) || (Const.VMS_BATCH_IMPORT_TEMPLATE == true)) {
                         if (faceDetectTask != null) {
@@ -307,9 +267,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                         if (mMyRedThread != null) {
                             mMyRedThread.closeredThread();
                         }
-                        // home_layout.setVisibility(View.VISIBLE);
-                        // templatenum=0;
-                        // template++;
                         ReaderCardFlag = false;
                         oneVsMoreView.setVisibility(View.GONE);
                         alert.setVisibility(View.GONE);
@@ -324,7 +281,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
 
                     if ((templatenum == 20) || (Const.VMS_TEMPLATE == true)) {
                         Const.VMS_TEMPLATE = false;
-                        Log.i("Gavin_debug", "templatenum==20");
                         promptshow_xml.setVisibility(View.GONE);
                         cancelToast();
                         ReaderCardFlag = true;//1:1
@@ -337,20 +293,13 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                             mMyRedThread.startredThread();
                         }
                         template = 0;
-                        // home_layout.setVisibility(View.GONE);
                     }
 
                     /*更新IP后的web重启*/
                     if (Const.UPDATE_IP == true) {
                         int returndate = DeviceSetFrament.updateSetting(AppData.getAppData().getUpdatedeviceip(), mContext);
                         if (returndate == 3) {
-                            mHandler.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    openHttpServer();
-                                }
-
-                            }, 3000);
+                            mHandler.postDelayed(() -> openHttpServer(), 3000);
                         }
                         Const.UPDATE_IP = false;
                     }
@@ -477,12 +426,9 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                     //  progesss1.setProgress(b);
                     if (bacthOk1 + bacthOk2 + bacthOk3 == mSum) {
                         // batchDialog.dismiss();
-                        mHandler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                Const.VMS_TEMPLATE = true;
-                                Const.VMS_BATCH_IMPORT_TEMPLATE = false;
-                            }
+                        mHandler.postDelayed(() -> {
+                            Const.VMS_TEMPLATE = true;
+                            Const.VMS_BATCH_IMPORT_TEMPLATE = false;
                         }, 2000);
 
                     }
@@ -496,12 +442,9 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                     // progesss2.setProgress(b2);
                     if (bacthOk1 + bacthOk2 + bacthOk3 == mSum) {
                         // batchDialog.dismiss();
-                        mHandler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                Const.VMS_TEMPLATE = true;
-                                Const.VMS_BATCH_IMPORT_TEMPLATE = false;
-                            }
+                        mHandler.postDelayed(() -> {
+                            Const.VMS_TEMPLATE = true;
+                            Const.VMS_BATCH_IMPORT_TEMPLATE = false;
                         }, 2000);
 
                     }
@@ -515,12 +458,9 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                     //  progesss3.setProgress(b3);
                     if (bacthOk1 + bacthOk2 + bacthOk3 == mSum) {
                         // batchDialog.dismiss();
-                        mHandler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                Const.VMS_TEMPLATE = true;
-                                Const.VMS_BATCH_IMPORT_TEMPLATE = false;
-                            }
+                        mHandler.postDelayed(() -> {
+                            Const.VMS_TEMPLATE = true;
+                            Const.VMS_BATCH_IMPORT_TEMPLATE = false;
                         }, 2000);
                     }
                     break;
@@ -627,13 +567,13 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
      * 初始化视图控件
      */
     private void initView() {
-        mCameraSurfView = (MyCameraSuf) findViewById(R.id.myCameraView);
+        mCameraSurfView = findViewById(R.id.myCameraView);
         imageStack = mCameraSurfView.getImgStack();
-        home_layout = (RelativeLayout) findViewById(R.id.home_layout);//待机界面
+        home_layout = findViewById(R.id.home_layout);//待机界面
 
         // 提示框
         promptshow_xml = findViewById(R.id.promptshow_xml);
-        loadprompt = (TextView) promptshow_xml.findViewById(R.id.loadprompt);
+        loadprompt = promptshow_xml.findViewById(R.id.loadprompt);
 
         //1:N
         oneVsMoreView = findViewById(R.id.onevsmore);
@@ -645,19 +585,19 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
 
         //1:1
         alert = findViewById(R.id.alert_xml);
-        faceBmp_view = (ImageView) alert.findViewById(R.id.comperFacebm);
-        cardBmp_view = (ImageView) alert.findViewById(R.id.comperCardbm);
-        idcard_Bmp = (ImageView) alert.findViewById(R.id.cardImage);
-        card_name = (TextView) alert.findViewById(R.id.name_1);
-        name = (TextView) alert.findViewById(R.id.userName);
-        card_sex = (TextView) alert.findViewById(R.id.sex);
-        card_nation = (TextView) alert.findViewById(R.id.nation);
-        year = (TextView) alert.findViewById(R.id.year);
-        day = (TextView) alert.findViewById(R.id.day);
-        month = (TextView) alert.findViewById(R.id.month);
-        addr = (TextView) alert.findViewById(R.id.addr);
-        cardNumber = (TextView) alert.findViewById(R.id.cardNumber);
-        isSuccessComper = (ImageView) alert.findViewById(R.id.isSuccessComper);
+        faceBmp_view = alert.findViewById(R.id.comperFacebm);
+        cardBmp_view = alert.findViewById(R.id.comperCardbm);
+        idcard_Bmp = alert.findViewById(R.id.cardImage);
+        card_name = alert.findViewById(R.id.name_1);
+        name = alert.findViewById(R.id.userName);
+        card_sex = alert.findViewById(R.id.sex);
+        card_nation = alert.findViewById(R.id.nation);
+        year = alert.findViewById(R.id.year);
+        day = alert.findViewById(R.id.day);
+        month = alert.findViewById(R.id.month);
+        addr = alert.findViewById(R.id.addr);
+        cardNumber = alert.findViewById(R.id.cardNumber);
+        isSuccessComper = alert.findViewById(R.id.isSuccessComper);
 
         //刷卡标记
         pro_xml = findViewById(R.id.pro);
@@ -665,13 +605,10 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         socket_status = findViewById(R.id.socket_status);
         showHttpUrl = findViewById(R.id.showHttpUrl);
 
-        home_set = (ImageView) findViewById(R.id.home_set);
-        home_set.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showConfirmPsdDialog();
+        home_set = findViewById(R.id.home_set);
+        home_set.setOnClickListener(view -> {
+            showConfirmPsdDialog();
 //                startActivity(new Intent(MainActivity.this, RegisterActivity.class));
-            }
         });
     }
 
@@ -709,24 +646,20 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                 final Bitmap cardBmp = IDPhotoHelper.Bgr2Bitmap(buf);
                 if (cardBmp != null) {
                     synchronized (this) {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                long start = System.currentTimeMillis();
-                                faceComperFrame(cardBmp);
-                                // System.out.println("人证比对时间:" + (System.currentTimeMillis() - start));
-                                AppData.getAppData().setName(idCardInfo.getName());
-                                AppData.getAppData().setSex(idCardInfo.getSex());
-                                AppData.getAppData().setNation(idCardInfo.getNation());
-                                AppData.getAppData().setBirthday(idCardInfo.getBirth());
-                                AppData.getAppData().setAddress(idCardInfo.getAddress());
-                                AppData.getAppData().setCardNo(idCardInfo.getId());
-                                AppData.getAppData().setCardBmp(cardBmp);
-                                Message msg = new Message();
-                                msg.obj = 5;
-                                msg.what = Const.COMPER_FINIASH;
-                                mHandler.sendMessage(msg);
-                            }
+                        new Thread(() -> {
+                            long start = System.currentTimeMillis();
+                            faceComperFrame(cardBmp);
+                            AppData.getAppData().setName(idCardInfo.getName());
+                            AppData.getAppData().setSex(idCardInfo.getSex());
+                            AppData.getAppData().setNation(idCardInfo.getNation());
+                            AppData.getAppData().setBirthday(idCardInfo.getBirth());
+                            AppData.getAppData().setAddress(idCardInfo.getAddress());
+                            AppData.getAppData().setCardNo(idCardInfo.getId());
+                            AppData.getAppData().setCardBmp(cardBmp);
+                            Message msg = new Message();
+                            msg.obj = 5;
+                            msg.what = Const.COMPER_FINIASH;
+                            mHandler.sendMessage(msg);
                         }).start();
                     }
                 } else {
@@ -815,7 +748,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                 }
             } else if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
                 Log.e(TAG, "插入usb了");
-                UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
                 if (device.getProductId() == PID && device.getVendorId() == VID) {
                     // 读卡器
                     startIDCardReader();
@@ -1159,7 +1092,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
 
         AppData.getAppData().setoneCompareScore(0);
         ReaderCardFlag = true;
-        //ReaderCardFlag = true;
         mHandler.postDelayed(() -> {
             oneVsMoreView.setVisibility(View.GONE);
             alert.setVisibility(View.GONE);
@@ -1210,31 +1142,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                         score = new AFR_FSDKMatching();
                     }
                     if (MyApplication.mList.size() > 0) {
-                      /*  Iterator iter = MyApplication.mList.entrySet().iterator();
-                        while (iter.hasNext()) {
-                            if((isOpenOneVsMore==false)||(Const.BATCH_IMPORT_TEMPLATE==true))
-                            {
-                                //  AppData.getAppData().setCompareScore(0);
-                                continue;
-                            }
-                            Map.Entry entry = (Map.Entry) iter.next();
-                            String fileName = (String) entry.getKey();
-                            byte[] mTemplate = (byte[]) entry.getValue();
-                            AFR_FSDKFace face3 = new AFR_FSDKFace(mTemplate);
-                            ret = MyApplication.mFaceLibCore.FacePairMatching(face3, face, score);
-                            if (score.getScore() >= fenshu) {
-                                if(user==null) {
-                                    user = new User();
-                                }
-                                if (MyApplication.faceProvider.quaryUserTableRowCount("select count(id) from tUser") != 0) {
-                                    user.setId(MyApplication.faceProvider.getUserByUserpath(fileName).getId());
-                                    AppData.getAppData().setUser(user);
-                                }
-                                fenshu = score.getScore();
-                                continue;
-                            }
-                        }*/
-
                         for (Map.Entry<String, byte[]> entry : MyApplication.mList.entrySet()) {
                             if ((isOpenOneVsMore == false) || (Const.BATCH_IMPORT_TEMPLATE == true) || (Const.DELETETEMPLATE == true)) {
                                 continue;
@@ -1290,7 +1197,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                 }
             }
         }
-
     }
 
     /**
@@ -1361,7 +1267,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                     msg.what = Const.UPDATE_UI;
                     mHandler.sendMessage(msg);
                 } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
@@ -1537,9 +1442,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
             return;
         }
 
-        //vms_Import_template=true;
         Const.VMS_BATCH_IMPORT_TEMPLATE = true;
-        // Const.BATCH_FLAG=1;
 
         System.out.println("一共：" + mSum);
         //将文件数据分成三个集合
@@ -1684,10 +1587,8 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
             e.printStackTrace();
         }
 
-        sbstdOut.append(new BufferedReader(new InputStreamReader(proc
-                .getInputStream())));
-        sbstdErr.append(new BufferedReader(new InputStreamReader(proc
-                .getErrorStream())));
+        sbstdOut.append(new BufferedReader(new InputStreamReader(proc.getInputStream())));
+        sbstdErr.append(new BufferedReader(new InputStreamReader(proc.getErrorStream())));
         if (proc.exitValue() != 0) {
         }
     }

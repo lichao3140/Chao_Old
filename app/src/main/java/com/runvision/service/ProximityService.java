@@ -8,7 +8,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 import android.widget.Toast;
 import com.common.pos.api.util.PosUtil;
 
@@ -19,7 +18,7 @@ public class ProximityService extends Service {
 
     private Timer mTimer = null;
     private TimerTask mTask = null;
-    private static final String TAG = "WINDOW";
+    private static final String TAG = "ProximityService";
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -35,7 +34,6 @@ public class ProximityService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i(TAG, "service is onCreate");
         if (mTask == null) {
             mTask = new TimerTask() {
                 @Override
@@ -43,8 +41,6 @@ public class ProximityService extends Service {
                     int ret = PosUtil.getPriximitySensorStatus();
                     Message message = mHandler.obtainMessage(ret);
                     mHandler.sendMessage(message);
-                    Log.i(TAG, "schedule is running");
-                    Log.i(TAG, ret + "");
                 }
             };
         }
@@ -79,6 +75,5 @@ public class ProximityService extends Service {
         mTimer.cancel();
         mTask = null;
         mTimer = null;
-        Log.i(TAG, "service is onDestroy");
     }
 }
