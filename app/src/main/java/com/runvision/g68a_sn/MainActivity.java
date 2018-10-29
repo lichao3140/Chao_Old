@@ -22,7 +22,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -60,7 +59,6 @@ import com.runvision.utils.SPUtil;
 import com.runvision.utils.SendData;
 import com.runvision.utils.TestDate;
 import com.runvision.webcore.ServerManager;
-import com.wits.serialport.SerialPortManager;
 import com.zkteco.android.IDReader.IDPhotoHelper;
 import com.zkteco.android.IDReader.WLTService;
 import com.zkteco.android.biometric.core.device.ParameterHelper;
@@ -92,10 +90,8 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
     private static String TAG = MainActivity.class.getSimpleName();
 
     private Context mContext;
-    //private ComperThread mComperThread;//1:n比对线程
     private MyRedThread mMyRedThread;//红外线程
     private UIThread uithread;//UI线程
-    private SLecDeviceThread sLecDeviceThread;
 
     //////////////////////////////////////////////////视图控件
     public MyCameraSuf mCameraSurfView;
@@ -548,7 +544,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
 
         hideBottomUIMenu();
         initView();
-        initRelay();
         mContext = this;
 
         application = (MyApplication) getApplication();
@@ -593,7 +588,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         mCameraSurfView.releaseCamera();
         //关闭红外
         mMyRedThread.closeredThread();
-        sLecDeviceThread.interrupt();
         if (mMyRedThread != null) {
             mMyRedThread.interrupt();
             mMyRedThread = null;
@@ -625,7 +619,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
     @Override
     protected void onDestroy() {
         MyApplication.mFaceLibCore.UninitialAllEngine();
-        mSerialPortManager.closeSerialPort4();
         super.onDestroy();
     }
 
@@ -679,12 +672,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
 //                startActivity(new Intent(MainActivity.this, RegisterActivity.class));
             }
         });
-    }
-
-    private void initRelay() {
-        mSerialPortManager = new SerialPortManager();
-        sLecDeviceThread = new SLecDeviceThread();
-        sLecDeviceThread.start();
     }
 
     /**
@@ -984,7 +971,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                     return;
                 }
                 GPIOHelper.openDoor(true);
-                openRelay();
 
                 mHandler.postDelayed(new Runnable() {
                     @Override
@@ -1763,33 +1749,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         return range;
     }
 
-    private SerialPortManager mSerialPortManager;
-    private InputStream mInputStream4;
-    private OutputStream mOutputStream4;
-    private com.wits.serialport.SerialPort serialPort4;
     private String icCard = "";
-
-    public void openRelay() {
-        if (mOutputStream4 == null) {
-            showToast("请先打开串口");
-            return;
-        }
-        try {
-            byte[] bytes1 = SlecProtocol.hexStringToBytes(new String[]{
-                            "55555555",  //用户id,8个字符，缺少的前面补0
-                            "12345678",//用户卡号,8个字符，缺少的的前面补0
-                            "0001"}//开门间隔,4个字符，缺少的的前面补0
-                    , true);
-            byte[] bytes = SlecProtocol.commandAndDataToAscii(
-                    ((byte) 0x01),
-                    bytes1
-            );
-            mOutputStream4.write(bytes);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     /**
      * 在java代码中执行adb命令
      * @param command
@@ -1832,61 +1792,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
             return true;
         }
         return false;
-    }
-
-    private class SLecDeviceThread extends Thread {
-        @Override
-        public void run() {
-            super.run();
-            try {
-                //串口4，继电器控制
-                serialPort4 = mSerialPortManager.getSerialPort4();
-                mInputStream4 = serialPort4.getInputStream();
-                mOutputStream4 = serialPort4.getOutputStream();
-                sleep(500);
-                while (true) {
-                    try {
-                        sleep(50);
-                        byte[] buffer = new byte[64];
-                        if (mInputStream4 == null) {
-                            continue;
-                        }
-                        int size = mInputStream4.read(buffer);
-
-                        if (size < 1) {
-                            continue;
-                        }
-
-                        int len = icCard.length();
-                        Log.e("gzy", "run: " + size + "--" + icCard);
-                        if (len == 0) {
-                            //第一条数据
-                            icCard = SlecProtocol.bytesToHexString2(buffer, size);
-                        } else {
-                            //之前已经有数据
-                            icCard = icCard + SlecProtocol.bytesToHexString2(buffer, size);
-                        }
-                        mHandler.removeCallbacks(cancelCardRunnable);
-                        //200ms没有新的数据就发送
-                        mHandler.postDelayed(cancelCardRunnable, 200);
-
-                    } catch (SecurityException e) {
-                        Log.e("SerialPort", "-----------------SecurityException");
-                    } catch (IOException e) {
-                        Log.e("SerialPort", "-----------------IOException" + e.toString());
-                    } catch (InvalidParameterException e) {
-                        Log.e("SerialPort", "-----------------InvalidParameterException");
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     /**
