@@ -45,6 +45,7 @@ import com.runvision.frament.DeviceSetFrament;
 import com.runvision.gpio.GPIOHelper;
 import com.runvision.gpio.SlecProtocol;
 import com.runvision.myview.MyCameraSuf;
+import com.runvision.service.ProximityService;
 import com.runvision.thread.BatchImport;
 import com.runvision.thread.FaceFramTask;
 import com.runvision.thread.HeartBeatThread;
@@ -71,11 +72,8 @@ import com.zkteco.android.biometric.module.idcard.meta.IDCardInfo;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.security.InvalidParameterException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -90,6 +88,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
     private static String TAG = MainActivity.class.getSimpleName();
 
     private Context mContext;
+    private Intent intentService;
     private MyRedThread mMyRedThread;//红外线程
     private UIThread uithread;//UI线程
 
@@ -550,6 +549,9 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         application.init();
         application.addActivity(this);
 
+        intentService = new Intent(mContext, ProximityService.class);
+        startService(intentService);
+
         openNetStatusReceiver();
         openSocket();
     }
@@ -558,13 +560,12 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
     protected void onResume() {
         super.onResume();
         hideBottomUIMenu();
-        // stratThread();
-        // bStop = false;
         IntentFilter usbDeviceStateFilter = new IntentFilter();
         usbDeviceStateFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
         usbDeviceStateFilter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
         registerReceiver(mUsbReceiver, usbDeviceStateFilter);
         startIDCardReader();
+        startService(intentService);
 
         if (uithread == null) {
             uithread = new UIThread();
@@ -577,7 +578,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         }
         mMyRedThread.startredThread();
         isOpenOneVsMore = true;
-        // Log.i("Gavin","mList:"+MyApplication.mList.size());
     }
 
     @Override
@@ -588,6 +588,7 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         mCameraSurfView.releaseCamera();
         //关闭红外
         mMyRedThread.closeredThread();
+        stopService(intentService);
         if (mMyRedThread != null) {
             mMyRedThread.interrupt();
             mMyRedThread = null;
