@@ -39,12 +39,12 @@ import com.runvision.bean.AppData;
 import com.runvision.bean.FaceInfo;
 import com.runvision.bean.ImageStack;
 import com.runvision.broadcast.NetWorkStateReceiver;
+import com.runvision.broadcast.UdiskReceiver;
 import com.runvision.core.Const;
 import com.runvision.db.Record;
 import com.runvision.db.User;
 import com.runvision.frament.DeviceSetFrament;
 import com.runvision.gpio.GPIOHelper;
-import com.runvision.gpio.SlecProtocol;
 import com.runvision.myview.MyCameraSuf;
 import com.runvision.service.ProximityService;
 import com.runvision.thread.BatchImport;
@@ -494,6 +494,9 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
 
         openNetStatusReceiver();
         openSocket();
+
+        //监听U盘热插拔模块启动
+        udiskPluggedin();
     }
 
     @Override
@@ -610,6 +613,23 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
             showConfirmPsdDialog();
 //                startActivity(new Intent(MainActivity.this, RegisterActivity.class));
         });
+    }
+
+    private void udiskPluggedin() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("android.hardware.usb.action.USB_STATE");
+        filter.addAction("android.hardware.action.USB_DISCONNECTED");
+        filter.addAction("android.hardware.action.USB_CONNECTED");
+
+        filter.addAction("android.intent.action.UMS_CONNECTED");
+        filter.addAction("android.intent.action.UMS_DISCONNECTED");
+        filter.addAction(Intent.ACTION_MEDIA_CHECKING);
+        filter.addAction(Intent.ACTION_MEDIA_MOUNTED);
+        filter.addAction(Intent.ACTION_MEDIA_EJECT);
+        filter.addAction(Intent.ACTION_MEDIA_REMOVED);
+        filter.addDataScheme("file");
+        UdiskReceiver mReceiver = new UdiskReceiver();
+        registerReceiver(mReceiver, filter);
     }
 
     /**
@@ -819,7 +839,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
                             msg.what = Const.READ_CARD;
                             msg.obj = idCardInfo;
                             mHandler.sendMessage(msg);
-
                         }
                     }
                 }

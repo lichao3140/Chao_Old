@@ -1,16 +1,29 @@
 apply plugin: 'com.android.application'
 
+def keystoreFilepath = ''
+def keystorePSW = ''
+def keystoreAlias = ''
+def keystoreAliasPSW = ''
+def keyfile = file('s.keystore.temp')
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+keystoreFilepath = properties.getProperty("keystore.path")
+
+if (keystoreFilepath) {
+    keystorePSW = properties.getProperty("keystore.password")
+    keystoreAlias = properties.getProperty("keystore.alias")
+    keystoreAliasPSW = properties.getProperty("keystore.alias_password")
+    keyfile = file(keystoreFilepath)
+}
+
 android {
     signingConfigs {
         debug {
-            //keystore中key的别名
-            keyAlias 'key0'
-            //keystore中key的密码
-            keyPassword 'lichao'
-            //keystore的文件路径，可以是绝对路径也可以是相对路径
-            storeFile file('src/main/assets/android_key.jks')
-            //keystore的密码
-            storePassword 'lichao'
+            keyAlias keystoreAlias
+            keyPassword keystoreAliasPSW
+            storeFile keyfile
+            storePassword keystorePSW
         }
     }
     compileSdkVersion 28
@@ -18,8 +31,9 @@ android {
         applicationId "com.runvision.g68a_sn"
         minSdkVersion 22
         targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
+        versionCode 4
+        versionName "1.0.4"
+        multiDexEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         aaptOptions.cruncherEnabled = false
         aaptOptions.useNewCruncher = false
@@ -77,4 +91,5 @@ dependencies {
     implementation files('libs/genderestimation.jar')
     implementation 'com.yanzhenjie:andserver:1.1.4'
     implementation 'com.google.code.gson:gson:2.8.0'
+    implementation 'com.android.support:multidex:1.0.3'
 }
