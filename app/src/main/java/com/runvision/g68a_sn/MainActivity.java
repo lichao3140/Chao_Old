@@ -481,9 +481,9 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
+        mContext = this;
         hideBottomUIMenu();
         initView();
-        mContext = this;
 
         application = (MyApplication) getApplication();
         application.init();
@@ -573,6 +573,8 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
         mCameraSurfView = findViewById(R.id.myCameraView);
         imageStack = mCameraSurfView.getImgStack();
         home_layout = findViewById(R.id.home_layout);//待机界面
+        version = findViewById(R.id.version);
+        version.setText("Version:" + UdiskReceiver.getVersionName(mContext));
 
         // 提示框
         promptshow_xml = findViewById(R.id.promptshow_xml);
@@ -862,7 +864,6 @@ public class MainActivity extends Activity implements NetWorkStateReceiver.INetS
             View v = this.getWindow().getDecorView();
             v.setSystemUiVisibility(View.GONE);
         } else if (Build.VERSION.SDK_INT >= 19) {
-            // for new api versions.
             View decorView = getWindow().getDecorView();
             int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY

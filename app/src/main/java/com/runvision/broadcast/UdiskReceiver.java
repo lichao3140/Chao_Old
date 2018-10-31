@@ -82,7 +82,7 @@ public class UdiskReceiver extends BroadcastReceiver {
      * @param context
      * @return
      */
-    public String getVersionName(Context context) {
+    public static String getVersionName(Context context) {
         String versionName = null;
         try {
             versionName = context.getPackageManager().getPackageInfo(
@@ -98,7 +98,7 @@ public class UdiskReceiver extends BroadcastReceiver {
      * @param context
      * @return
      */
-    public int getVersionCode(Context context) {
+    public static int getVersionCode(Context context) {
         int versionCode = 0;
         try {
             versionCode = context.getPackageManager().getPackageInfo(
